@@ -1,0 +1,14 @@
+﻿@model DateTime;
+@using Nop.Services.Helpers;
+@{ 
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUIDateFormat", "yyyy-MM-dd");
+}
+
+<input id="@Html.IdForModel()" name="@Html.NameForModel()" value="@((Model > DateTime.MinValue ? Model : DateTime.Today).ToString(dateFormat))" />
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.IdForModel()").kendoDatePicker({
+            format: "@dateFormat"
+        });
+    });
+</script>

@@ -1,0 +1,37 @@
+﻿@model UserGuidesModel
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.ContentManagement.UserGuides.UserGuidesItems.EditUserGuidesDetails").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("User guide");
+}
+
+<form asp-controller="UserGuides" asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.ContentManagement.UserGuides.UserGuidesItems.EditUserGuidesDetails") - @Model.ContentTitle
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">@T("Admin.ContentManagement.UserGuides.UserGuidesItems.BackToList")</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn bg-blue">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+            <span id="userguidesitem-delete" class="btn bg-red">
+                <i class="fa fa-trash-o"></i>
+                @T("Admin.Common.Delete")
+            </span>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_userguides_details_buttons", additionalData = Model.Id })
+        </div>
+    </div>
+    @await Html.PartialAsync("_CreateOrUpdate", Model)
+</form>
+<nop-delete-confirmation asp-model-id="@Model.Id" asp-button-id="userguidesitem-delete" />

@@ -1,0 +1,56 @@
+﻿@using Nop.Core.Domain.Directory
+@using Nop.Services
+@model SecurityQuestionViewModel
+
+<div asp-validation-summary="All"></div>
+<input asp-for="QuestionID" type="hidden" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_security_details_top", additionalData = Model.QuestionID })
+            <div class="panel panel-default">
+
+                @(Html.LocalizedEditor<SecurityQuestionViewModel, SecurityQuestionViewLocalizedModel>("security-info-localized",
+            @<div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-label asp-for="@Model.Locales[item].Question" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="@Model.Locales[item].Question" />
+                        <span asp-validation-for="@Model.Locales[item].Question"></span>
+                    </div>
+                </div>
+                <input type="hidden" asp-for="@Model.Locales[item].LanguageId" />
+            </div>
+                  ,
+                @<div>
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <nop-label asp-for="Question" asp-display-hint="true"/>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="Question"  asp-required="true" asp-disabled="true" />
+                            <span asp-validation-for="Question"></span>
+                        </div>
+                    </div>
+                </div>
+                      ))
+                 <div class="form-group">
+                     <div class="col-md-3">
+                         <nop-label asp-for="AvailableStatusOptions" />
+                     </div>
+                     <div class="col-md-9">
+                         <nop-editor asp-for="IsActive" asp-required="false"/>
+                         <span asp-validation-for="IsActive"></span>
+                     </div>
+                 </div>
+
+                <div class="panel-body">
+                </div>
+                @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_security_details_bottom", additionalData = Model.QuestionID })
+            </div>
+        </div>
+    </div>
+</div>

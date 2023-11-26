@@ -1,0 +1,57 @@
+{
+  //ms client id - for development testing
+  "client_id": "75mctkc3v8kdqh8mmb5tr2849n",
+  //finsys client id
+  //"client_id": "68malclao7duqee6574n8gbl7s",
+  "issuer": "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_LYQ0cka5F",
+  "keys": [
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "vuwRZQvcH4Zw0OAue2TkZTfZyXqnHHGFn4ScZSySQW0=",
+      "kty": "RSA",
+      "n": "iCCJ_7jhSE8RRugzqH9l2U0CyRDQehjkMR-vt5EovkWZ1yn6QFSW5FVlq0Moc1Yfc5xez-Gk7HT1qbiRZ7ehCtug1zq6hLh4xxMU4FLtVdrBuNhorqGazyV6pqQZfgFyiNtircPn-t4U26iToZ1k0JsGayTr5NZqOdejNzyc38e-oA24WW1L8Hr-Amw9wtiojRp5xcs3_5Lo0SWtRfT4fC4PwhnB28JbykYvnLI91yyWbJw7kseOzz61B3cACK1lND8J6LMMlcUOt5BaM3fDQiBMtide4Qpvs30zNnP22Z5WmfalwTSPxpEt9ujF-jndMNmeflFuGOpr0oqWnl-IVw",
+      "use": "sig"
+    },
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "GhFxbEe0hPKfqHXiO6b978hcY6hM3JzLSC/8vDs+FfA=",
+      "kty": "RSA",
+      "n": "7N2yQBK9f2Wjp6yksylcmCAH2MQtnGmSay8DTahhHTyS6FsLfvz0snxOVuoE_ILj3XzdRRjDYZ5cvD5sCKQ6BnMXAQu7waJNt7cmE-qoZ9o1Aux1fHYx2bQ0DOpNlK0zsH5hZ9jYDeVi5f_PvM_8W7O79ss0ySUlNxuLrPLg1AJ2zeyF-YV0ifbYh-1B49WZcMaguk2nHlUyrM7JGpv7EfZ2jJm-EjIeFhKXaxdhObzn-ufuDLTm7BbpXC7BcvFQch_PqDzeEE2-iaRNSfkHwHVnoWrZZFBTeDBtKttfiMlOSHg9bCL1BOaJ70r0SISKSQl9BrD3R0jwqd-gPhsyZw",
+      "use": "sig"
+    },
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "qrVoytohqOU/2RaF6JbvilZA0EfXIJH5lsx7uknwiWg=",
+      "kty": "RSA",
+      "n": "gObqqSKgPDr74Nwmog5nOSyrgFlEpZUX8Kidm3_AskYlAo0aBHPoYnohG0aWeUsg11hFBRsaEpXGl0l3VtwjdCaELjm-raUiOunKNz6w_5ol18ibAzGNe6RPNFOMAVhjor_J-DqRKPF15W0wnC3QIZgw_crNBolY7gH5xLgYGPC-ciy23U8XcWPHM4jZdsbHeH6Q0aKgGkn4c5fqVm2FJmo0whfq35qsaDDKDXGyPnLG-_r-EI4lSuEv1gCvgrXTJcbwahlnFdVEE62HazUfZhF8FR1lOSCk1sEKeEQDmJfrZ1sSKXLMj8aEJtTObHcQEmyW-WSINim5fOBA20BteQ",
+      "use": "sig"
+    },
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "1nj2v5mxaxeM9vbx9Lc+tnxRpW8SPwtwv1ufyG+cttI=",
+      "kty": "RSA",
+      "n": "m5mwjdVPSarIaaLofdXzfRCr0G0tZ4PTq5wrilwfCKMfkAPP4q8jLwkAJ1NZYflkatemYQnOY9-U8t3Zb2QIxGRZCgW2C6yT3P02u_G1zu51SPpabTeSUJwO_i2THywf4Wbz2OzYal4vc1cZXkJNqjVPlx9RjkrfKN9YRx1eGsZ-jQDhUecl5IfclAYRGpQj6nLulCmeepQTRmBxKu23D9E34jUSJQkqWyHkEWLHyjNiBgp-TtOvlsmdt5tDoGrXPiM4WKhyytAul-Lh1JwTXcLR51xiTPpQIDw3dN6hVn1TKJvbLq_9vPvBWDwvMS_pJp4vsOEDxUXfhjWC6G_erQ",
+      "use": "sig"
+    },
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "/4nzJTkvOJJdFOMTre3aMrrXjk/VCrQQrJlu3tSFiNY=",
+      "kty": "RSA",
+      "n": "gFIjwU_EIeDRRmWdfPxTIfc7_YLi_V4eaY9IXUcPfQEPWO36UMCNTVTCwxZP5Z0AXvj-9wZQotL432Qk19VHjjXdDJLUEeQHnNyjpru6r8NIYP0U90qkXMVUyZQ-Sqnbd_Z61GgPNGDGfZAwUZfLNjsHhjrXpSP5XHR76Zub0DDiBZF4fwJ0Au6g2OopkH5tXhvDlFiHyS8SO5yEhday5QdonLg5Nufv6zPuvY4otxNboaB0vqd4G-Oil3yAZHxQv9b89YP3FlCQAatV04mg7St70-fmyQfbZzkWxITQXZepRNj_hCPgntCVbhWPaP1iAwpm2i898VKr3Tmc8QIkAQ",
+      "use": "sig"
+    },
+    {
+      "alg": "RS256",
+      "e": "AQAB",
+      "kid": "8F+Xb7VJFyb3HHkh0cJaftOiBWUlamUiqUmbgkEwnzk=",
+      "kty": "RSA",
+      "n": "6T4rSifnGWEKCStH3cDMm_SB0g3iGTPMBvpzUo4PLNhAI4u7zKmJzLFN9O0gzZXVo4yhiLpnlfQo30lHhndcdtnFxvU5Ws1YqfVcsvsAKdM9roDK1azP7h2KejDSXR4IoYgahdFJZbTWsCq1tN689bo5QSJMaL75DOLQ1xlmfGwL4DYhCUTjg1MCpFsmmGRcVflNmYe3tLCDuc_uesOnmOBk-1RC93Zzi9ygfR58NJM9WeaUHDBjyNsAMYpxYDhyjVMuE2HiyPIS60xUzPsm9tyBm8AQ0pIuPbThVIgsa2h-1ugagCJQFwjr8XTgnP_vCdqcyXCySyr8dixRDShwfw",
+      "use": "sig"
+    }
+  ]
+}

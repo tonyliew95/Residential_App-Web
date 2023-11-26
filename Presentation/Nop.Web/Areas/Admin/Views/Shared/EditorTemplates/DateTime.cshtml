@@ -1,0 +1,52 @@
+@model DateTime
+@using Nop.Services.Helpers;
+@{
+    var dateTimeFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUIDateTimeFormat", "yyyy-MM-dd HH:mm");
+    var isReadOnly = ViewBag.isReadOnly == null ? true : false; //wailiang 20181226 MDT-150
+}
+
+@*//wailiang 20181226 MDT-150 \/*@
+@*<input id="@Html.IdForModel()" name="@Html.NameForModel()" value="@((Model > DateTime.MinValue ? Model : DateTime.Today).ToString(dateTimeFormat))" />
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#@Html.IdForModel()").kendoDateTimePicker({
+                popup: {
+                    position: "bottom right",
+                    origin: "top right"
+                },
+                format: "@dateTimeFormat"
+            });
+        });
+    </script>*@
+
+@if (isReadOnly == false)
+{
+    <input id="@Html.IdForModel()" name="@Html.NameForModel()" value="@((Model > DateTime.MinValue ? Model : DateTime.Today).ToString(dateTimeFormat))" disabled="disabled" />
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.IdForModel()").kendoDateTimePicker({
+            popup: {
+                position: "bottom right",
+                origin: "top right"
+            },
+            format: "@dateTimeFormat"
+        });
+    });
+    </script>
+}
+else if (isReadOnly == true)
+{
+    <input id="@Html.IdForModel()" name="@Html.NameForModel()" value="@((Model > DateTime.MinValue ? Model : DateTime.Today).ToString(dateTimeFormat))" />
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.IdForModel()").kendoDateTimePicker({
+            popup: {
+                position: "bottom right",
+                origin: "top right"
+            },
+            format: "@dateTimeFormat"
+        });
+    });
+    </script>
+}
+@*//wailiang 20181226 MDT-150 /\*@

@@ -1,0 +1,306 @@
+﻿@model UserGuidesListModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss"); //wailiang 20181002 MSP-190
+
+    //page title
+    ViewBag.Title = T("Admin.ContentManagement.Announcements.UserGuides").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("User guide");
+}
+
+@*<nop-antiforgery-token />*@
+<form asp-controller="UserGuides" asp-action="List" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.ContentManagement.Announcements.UserGuides")
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </a>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_userguides_list_buttons" })
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <!-- Search Panel [S] -->
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="CreatedOnFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="CreatedOnFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="CreatedOnTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="CreatedOnTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="SearchText" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="SearchText" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PublishedDateFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="PublishedDateFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PublishedDateTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="PublishedDateTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="SearchPublishedId" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <nop-select asp-for="SearchPublishedId" asp-items="Model.AvailablePublishedOptions" />
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="search-userguides" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Search Panel [E] -->
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="userguides-grid"></div>
+                        <!-- retrieve data block start -->
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                function userguide() {
+                                    $("#userguides-grid").kendoGrid({
+                                        dataSource: {
+                                            type: "json",
+                                            transport: {
+                                                read: {
+                                                    url: "@Html.Raw(Url.Action("List", "UserGuides"))", //ActionName and Controller
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: additionalData //searching criteria parameters
+                                                },
+                                                update: {
+                                                    url: "@Html.Raw(Url.Action("Update", "UserGuides"))",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: addAntiForgeryToken
+                                                },
+                                                destroy: {
+                                                    url: "@Html.Raw(Url.Action("Delete", "UserGuides"))",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: addAntiForgeryToken
+                                                }
+                                            },
+                                            schema: { //handle data return from controller
+                                                data: "Data",
+                                                total: "Total",
+                                                errors: "Errors",
+                                                model: {
+                                                    id: "Id",
+                                                    fields: {
+                                                        Id: { editable: false, type: "number" },
+                                                        ContentTitle: { editable: false, type: "string" },
+                                                        ContentTittleChinese: { editable: false, type: "string" },
+                                                        StartDate: { editable: false, type: "date" },
+                                                        EndDate: { editable: false, type: "date" },
+                                                        IsPublished: { editable: false, type: "boolean" },
+                                                        CreatedOn: { editable: false, type: "date" }
+                                                    }
+												}
+                                            },
+                                            requestEnd: function (e) {
+                                                if (e.type == "update") {
+                                                    this.read();
+                                                }
+                                            },
+                                            error: function(e) {
+                                                display_kendoui_grid_error(e);
+                                                // Cancel the changes
+                                                this.cancelChanges();
+                                            },
+                                            pageSize: @(defaultGridPageSize),
+                                            serverPaging: true,
+                                            serverFiltering: true,
+                                            serverSorting: true
+                                        },
+                                        pageable: {
+                                            refresh: true,
+                                            pageSizes: [@(gridPageSizes)],
+                                            @await Html.PartialAsync("_GridPagerMessages")
+                                        },
+                                        editable: {
+                                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                            mode: "inline"
+                                        },
+                                        scrollable: false,
+                                        columns: [ //arrange schema data into columns
+                                            //{
+                                            //    field: "Id",
+                                            //    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                            //    headerAttributes: { style: "text-align:center" },
+                                            //    attributes: { style: "text-align:center" },
+                                            //    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                            //    width: 50
+                                            //},
+                                            {
+                                                field: "ContentTitle",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.Title")"
+                                            }, { @* WilliamHo 20181226 MDT-179 *@
+                                                field: "ContentTittleChinese",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.TitleChinese")"
+                                            }, {
+                                                field: "StartDate",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.List.PublishedDateFrom")",@*LeeChurn 20181010 MSP- 229"@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.StartDate")*@
+                                                width: 200,
+                                                type: "date",
+                                                format: "{0:@dateFormat}"
+                                            }, {
+                                                field: "EndDate",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.List.PublishedDateTo")",@*LeeChurn 20181010 MSP- 229"@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.EndDate")*@
+                                                width: 200,
+                                                type: "date",
+                                                format: "{0:@dateFormat}"
+                                            }, {
+                                                field: "IsPublished",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.Published")",
+                                                width: 100,
+                                                headerAttributes: { style: "text-align:center" },
+                                                attributes: { style: "text-align:center" },
+                                                template: '# if(IsPublished) {# <i class="fa fa-check true-icon"></i> #} else {# <i class="fa fa-close false-icon"></i> #} #'
+                                            }, {
+                                                field: "CreatedOn",
+                                                title: "@T("Admin.ContentManagement.UserGuides.UserGuidesItems.Fields.CreatedOn")",
+                                                width: 200,
+                                                type: "date",
+                                                format: "{0:@dateFormat}"
+                                            }, {
+                                                field: "Id",
+                                                title: "@T("Admin.Common.Edit")",
+                                                width: 100,
+                                                headerAttributes: { style: "text-align:center" },
+                                                attributes: { style: "text-align:center" },
+                                                template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil-square-o"></i>@T("Admin.Common.Edit")</a>'
+                                            }, @*{
+                                                field: "Id",
+                                                title: "@T("Admin.Common.Delete")",
+                                                width: 100,
+                                                headerAttributes: { style: "text-align:center" },
+                                                //attributes: { style: "text-align:center" },
+                                                //template: '<a class="btn btn-default" href="Delete/#=Id#"><i class="fa fa-trash-o"></i>@T("Admin.Common.Delete")</a>',
+                                                command: {
+                                                    name: "destroy",
+                                                    iconClass: "fa fa-trash-o"
+                                                }
+                                            }*@
+                                        ]
+                                    });
+                                    }
+                                    $('#search-userguides').click(function () {
+                                        //search
+                                        userguide();
+                                        //validate date cannot be empty
+                                        var dtFrom = $('#@Html.IdFor(model => model.CreatedOnFrom)').val();
+                                        var dtTo = $('#@Html.IdFor(model => model.CreatedOnTo)').val();
+
+                                        if (dtFrom == '' || dtTo == '') {
+                                            alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                        }
+
+                                        var dtFrom1 = new Date(dtFrom);
+                                        var dtTo1 = new Date(dtTo);
+
+                                        if (dtTo1 < dtFrom1)
+                                        {
+                                            alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                        }
+
+                                        var grid = $('#userguides-grid').data('kendoGrid');
+                                        grid.dataSource.page(1); //new search. Set page size to 1
+                                        //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                        //clear selected checkboxes
+                                        $('.checkboxGroups').attr('checked', false).change();
+                                        selectedIds = [];
+                                        return false;
+                                    });
+                                    function additionalData() { //searching criteria parameters
+                                        var data = {
+                                            CreatedOnFrom: $('#@Html.IdFor(model => model.CreatedOnFrom)').val(),
+                                            CreatedOnTo: $('#@Html.IdFor(model => model.CreatedOnTo)').val(),
+                                            PublishedDateFrom: $('#@Html.IdFor(model => model.PublishedDateFrom)').val(),
+                                            PublishedDateTo: $('#@Html.IdFor(model => model.PublishedDateTo)').val(),
+                                            SearchText: $('#@Html.IdFor(model => model.SearchText)').val(),
+                                            SearchPublishedId: $('#SearchPublishedId').val()
+                                        };
+                                        addAntiForgeryToken(data);
+                                        return data;
+                                    }
+                                });
+                        </script>
+
+                        @*<script type="text/javascript">
+                                $(document).ready(function () {
+                                    //search button
+                                    
+
+                                    //press ENTER to search
+                                    $("".concat("#@Html.IdFor(model => model.CreatedOnFrom),",
+                                        "#@Html.IdFor(model => model.CreatedOnTo),",
+                                        "#@Html.IdFor(model => model.PublishedDateFrom),",
+                                        "#@Html.IdFor(model => model.PublishedDateTo),",
+                                        "#@Html.IdFor(model => model.SearchPublishedId),",
+                                        "#@Html.IdFor(model => model.SearchText)")).keydown(function(event) {
+                                        if (event.keyCode === 13) {
+                                            $("#search-userguides").click();
+                                            return false;
+                                        }
+                                    });
+                                });
+
+                                
+                        </script>*@
+                        <!-- retrieve data block end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

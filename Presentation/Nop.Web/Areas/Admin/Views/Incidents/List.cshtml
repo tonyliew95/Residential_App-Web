@@ -1,0 +1,259 @@
+﻿@*//wailiang 20190320 RDT-127 \/*@
+@model IncidentsListModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss"); //wailiang 20181002 MSP-190
+
+    //page title
+    ViewBag.Title = T("Incidents.IncidentsList.IncidentsItems").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Incidents List");
+}
+
+<nop-antiforgery-token />
+<form asp-controller="Incidents" asp-action="List" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Incidents.IncidentsList.IncidentsItems")
+        </h1>
+        <div class="pull-right">
+            <a asp-action="Create" class="btn bg-blue">
+                <i class="fa fa-plus-square"></i>
+                @T("Admin.Common.AddNew")
+            </a>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_incidents_list_buttons" })
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <!-- Search Panel [S] -->
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Inc_DateFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Inc_DateFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Inc_DateTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Inc_DateTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Title" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Title" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Status" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <nop-select asp-for="Status" asp-items="Model.StatusValue" />
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                                @*<div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Category" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <nop-select asp-for="Category" asp-items="Model.Categories" />
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Type" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <nop-select asp-for="Type" asp-items="Model.Types" />
+                                    </div>
+                                    <div class="col-md-3"></div>
+                                </div>*@
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="search-incidents" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Search Panel [E] -->
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="incidents-grid"></div>
+                        <!-- retrieve data block start -->
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                function incidents() {
+                                    $("#incidents-grid").kendoGrid({
+                                        dataSource: {
+                                            type: "json",
+                                            transport: {
+                                                read: {
+                                                    url: "@Html.Raw(Url.Action("List", "Incidents"))", //ActionName and Controller
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: additionalData //searching criteria parameters
+                                                },
+                                                update: {
+                                                    url: "@Html.Raw(Url.Action("Update", "Incidents"))",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: addAntiForgeryToken
+                                                },
+                                                destroy: {
+                                                    url: "@Html.Raw(Url.Action("Delete", "Incidents"))",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: addAntiForgeryToken
+                                                }
+                                            },
+                                            schema: { //handle data return from controller
+                                                data: "Data",
+                                                total: "Total",
+                                                errors: "Errors",
+                                                model: {
+                                                    id: "Id",
+                                                    fields: {
+                                                        Id: { editable: false, type: "number" },
+                                                        Title: { editable: false, type: "string" },
+                                                        Inc_DateTime: { editable: false, type: "date" },
+                                                        Status: { editable: false, type: "string" },
+                                                    }
+												}
+                                            },
+                                            requestEnd: function (e) {
+                                                if (e.type == "update") {
+                                                    this.read();
+                                                }
+                                            },
+                                            error: function(e) {
+                                                display_kendoui_grid_error(e);
+                                                // Cancel the changes
+                                                this.cancelChanges();
+                                            },
+                                            pageSize: @(defaultGridPageSize),
+                                            serverPaging: true,
+                                            serverFiltering: true,
+                                            serverSorting: true
+                                        },
+                                        pageable: {
+                                            refresh: true,
+                                            pageSizes: [@(gridPageSizes)],
+                                            @await Html.PartialAsync("_GridPagerMessages")
+                                        },
+                                        editable: {
+                                            confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                            mode: "inline"
+                                        },
+                                        scrollable: false,
+                                        columns: [ //arrange schema data into columns
+                                            //{
+                                            //    field: "Id",
+                                            //    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                            //    headerAttributes: { style: "text-align:center" },
+                                            //    attributes: { style: "text-align:center" },
+                                            //    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                            //    width: 50
+                                            //},
+                                            {
+                                                field: "Title",
+                                                title: "@T("Incidents.IncidentsList.IncidentsItems.Fields.Title")"
+                                            },
+                                            {
+                                                field: "Inc_DateTime",
+                                                title: "@T("Incidents.IncidentsList.IncidentsItems.Fields.Inc_Date")",
+                                                width: 200,
+                                                format: "{0: @dateFormat}",
+                                            },
+                                            {
+                                                field: "Status",
+                                                title: "@T("Incidents.IncidentsList.IncidentsItems.Fields.Status")",
+                                                width: 100,
+                                            },
+                                            {
+                                                field: "Id",
+                                                title: "@T("Admin.Common.Edit")",
+                                                width: 100,
+                                                headerAttributes: { style: "text-align:center" },
+                                                attributes: { style: "text-align:center" },
+                                                template: '<a class="btn btn-default" href="Edit/#=Id#"><i class="fa fa-pencil-square-o"></i>@T("Admin.Common.Edit")</a>'
+                                            }
+                                        ]
+                                    });
+                                    }
+                                    $('#search-incidents').click(function () {
+                                        //search
+                                        incidents();
+                                        //validate date cannot be empty
+                                        var dtFrom = $('#@Html.IdFor(model => model.Inc_DateFrom)').val();
+                                        var dtTo = $('#@Html.IdFor(model => model.Inc_DateTo)').val();
+
+                                        if (dtFrom == '' || dtTo == '') {
+                                            alert("@T("DateTimeFormat.NoEmpty")");
+                                        }
+
+                                        var dtFrom1 = new Date(dtFrom);
+                                        var dtTo1 = new Date(dtTo);
+
+                                        if (dtTo1 < dtFrom1)
+                                        {
+                                            alert("@T("DateTimeFormat.UnusualDateRange")");
+                                        }
+
+                                        var grid = $('#incidents-grid').data('kendoGrid');
+                                        grid.dataSource.page(1); //new search. Set page size to 1
+                                        //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                        //clear selected checkboxes
+                                        $('.checkboxGroups').attr('checked', false).change();
+                                        selectedIds = [];
+                                        return false;
+                                    });
+                                    function additionalData() { //searching criteria parameters
+                                        var data = {
+                                            Title: $('#@Html.IdFor(model => model.Title)').val(),
+                                            Inc_DateFrom: $('#@Html.IdFor(model => model.Inc_DateFrom)').val(),
+                                            Inc_DateTo: $('#@Html.IdFor(model => model.Inc_DateTo)').val(),
+                                            Status: $('#Status').val(),
+                                            //Type: $('#Type').val(),
+                                            //Category: $('#Category').val(),
+                                        };
+                                        addAntiForgeryToken(data);
+                                        return data;
+                                    }
+                                });
+                        </script>
+
+                        <!-- retrieve data block end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@*//wailiang 20190320 RDT-127 /\*@

@@ -1,0 +1,384 @@
+﻿@model ConsumptionRewardSelfListModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss"); 
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.ConsumptionRewardTeam").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Consumption Reward Team");
+}
+
+<form asp-controller="Transaction" asp-action="ConsumptionRewardTeamList" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.TransactionList.ConsumptionRewardTeam")
+        </h1>
+
+        <div class="pull-right">
+            <button type="submit" name="exportcsv" class="btn bg-green">
+                <i class="fa fa-download"></i>
+                @T("Admin.Common.ExportToCsv")
+            </button>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_list_taskreward_buttons" })
+        </div>
+
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Username" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Username" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="PlatformID" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="PlatformID" asp-items="Model.PlatformNameOptions" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="FromDate" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="FromDate" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ToDate" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="ToDate" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="MemberRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="MemberRewardFrom" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="MemberRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="MemberRewardTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ConsumptionFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="ConsumptionFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ConsumptionTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="ConsumptionTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="HonoraryCitizenRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="HonoraryCitizenRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="HonoraryCitizenRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="HonoraryCitizenRewardTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TotalRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="TotalRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TotalRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="TotalRewardTo" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Panel [E] -->
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="txn-grid"></div>
+                        <!-- retrieve data block start -->
+                        <script type="text/javascript">
+
+                        </script>
+
+                        <script type="text/javascript">
+
+                            $(document).ready(function () {
+
+                                var proceed = (('@Model.IsRefreshData').toLowerCase() === 'true');
+                                if (proceed)
+                                {
+                                    getTrx();
+                                    var grid = $('#txn-grid').data('kendoGrid');
+                                    grid.dataSource.page(1);
+                                }
+
+                                function getTrx() {
+
+                                    $("#txn-grid").kendoGrid({
+                                        dataSource: {
+                                            type: "json",
+                                            transport: {
+                                                read: {
+                                                    url: "@Html.Raw(Url.Action("ConsumptionRewardTeamList", "Transaction"))", //ActionName and Controller
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: additionalData
+                                                }
+                                            },
+                                            schema: { //handle data return from controller
+                                                data: "Data",
+                                                total: "Total",
+                                                errors: "Errors",
+                                                model: {
+                                                    //id: "Id",
+                                                    username: "Username",
+                                                    //Date: "Date",
+                                                    fields: {
+                                                        Username: { editable: false, type: "string" },
+                                                        Date: { editable: false, type: "date" },
+                                                        PlatformName: { editable: false, type: "string" },
+                                                        Deposit_Returned: { editable: false, type: "string" },
+                                                        Membership_Reward: { editable: false, type: "string" },
+                                                        Consumption_Reward: { editable: false, type: "string" },
+                                                        Merchant_Ref_Reward: { editable: false, type: "string" },
+                                                        Total_Reward: { editable: false, type: "string" }
+                                                    }
+                                                }
+                                            },
+                                            error: function (e) {
+                                                display_kendoui_grid_error(e);
+                                                // Cancel the changes
+                                                this.cancelChanges();
+                                            },
+                                            pageSize: @(defaultGridPageSize),
+                                            serverPaging: true,
+                                            serverFiltering: true,
+                                            serverSorting: true
+                                        },
+                                        pageable: {
+                                            refresh: true,
+                                            pageSizes: [@(gridPageSizes)],
+                                            @await Html.PartialAsync("_GridPagerMessages")
+                                        },
+                                        scrollable: false,
+                                        columns: [
+                                            {
+                                                field: "Username",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.Username")",
+                                                width: 500
+                                            },
+                                            {
+                                                field: "Date",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.Date")",
+                                                width: 250,
+                                                format: "{0: @dateFormat}"
+                                            },
+                                            {
+                                                field: "PlatformName",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.PlatformName")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Deposit_Returned",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.DepositReturned")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Membership_Reward",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.MembershipReward")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Consumption_Reward",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalConsumptionReward.mbtc")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "TotalHonoraryCitizenReward",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalHonoraryCitizenReward.mbtc")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Total_Reward",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardSelf.Fields.TotalReward")",
+                                                width: 250
+                                            },
+                                            @*{
+                                                field: "Username",
+                                                title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.More")",
+                                                width: 50,
+                                                headerAttributes: { style: "text-align:center" },
+                                                attributes: { style: "text-align:center" },
+                                                template: '<a class="btn btn-default" href="ConsumptionRewardHistoryList?'
+                                                    + 'username=#=Username#'
+                                                    + '&date=#=kendo.toString(kendo.parseDate(Date,"yyyy-MM-dd"),"yyyy-MM-dd")#'
+                                                    + '&xFromDate=' + $('#FromDate').val()
+                                                    + '&xToDate=' + $('#ToDate').val()
+                                                    + '&xUsername=' + $('#Username').val()
+                                                    + '&xPlatformID=' + $('#PlatformID').val()
+                                                    + '&xDepositReturnFrom=' + $('#DepositReturnFrom').val()
+                                                    + '&xDepositReturnTo=' + $('#DepositReturnTo').val()
+                                                    + '&xMemberRewardFrom=' + $('#MemberRewardFrom').val()
+                                                    + '&xMemberRewardTo=' + $('#MemberRewardTo').val()
+                                                    + '&xConsumptionFrom=' + $('#ConsumptionFrom').val()
+                                                    + '&xConsumptionTo=' + $('#ConsumptionTo').val()
+                                                    + '&xMerchantRefFrom=' + $('#MerchantRefFrom').val()
+                                                    + '&xMerchantRefTo=' + $('#MerchantRefTo').val()
+                                                    + '&xTotalRewardFrom=' + $('#TotalRewardFrom').val()
+                                                    + '&xTotalRewardTo=' + $('#TotalRewardTo').val()
+                                                    + ' ">@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TeamRewardHistory")</a>'
+                                            }*@
+                                        ]
+                                    });
+                                }
+
+                                //search button
+                                $('#search-txn').click(function () {
+
+                                    var dtFrom = $('#@Html.IdFor(model => model.FromDate)').val();
+                                    var dtTo = $('#@Html.IdFor(model => model.ToDate)').val();
+
+                                    var dtFrom1 = new Date(dtFrom);
+                                    var dtTo1 = new Date(dtTo);
+
+                                    if (dtTo1 < dtFrom1) {
+                                        alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                        return;
+                                    }
+
+                                    getTrx();
+                                    var grid = $('#txn-grid').data('kendoGrid');
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+
+                                    return false;
+                                });
+
+                                function additionalData() {
+                                    var data = {
+                                        Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                        PlatformID: $('#@Html.IdFor(model => model.PlatformID)').val(),
+                                        FromDate: $('#@Html.IdFor(model => model.FromDate)').val(),
+                                        ToDate: $('#@Html.IdFor(model => model.ToDate)').val(),
+                                        DepositReturnFrom: $('#@Html.IdFor(model => model.DepositReturnFrom)').val(),
+                                        DepositReturnTo: $('#@Html.IdFor(model => model.DepositReturnTo)').val(),
+                                        MemberRewardFrom: $('#@Html.IdFor(model => model.MemberRewardFrom)').val(),
+                                        MemberRewardTo: $('#@Html.IdFor(model => model.MemberRewardTo)').val(),
+                                        ConsumptionFrom: $('#@Html.IdFor(model => model.ConsumptionFrom)').val(),
+                                        ConsumptionTo: $('#@Html.IdFor(model => model.ConsumptionTo)').val(),
+                                        HonoraryCitizenRewardFrom: $('#@Html.IdFor(model => model.HonoraryCitizenRewardFrom)').val(),
+                                        HonoraryCitizenRewardTo: $('#@Html.IdFor(model => model.HonoraryCitizenRewardTo)').val(),
+                                        TotalRewardFrom: $('#@Html.IdFor(model => model.TotalRewardFrom)').val(),
+                                        TotalRewardTo: $('#@Html.IdFor(model => model.TotalRewardTo)').val()
+                                    };
+                                    addAntiForgeryToken(data);
+                                    return data;
+								}
+
+								//search button
+								$("".concat(
+									"#@Html.IdFor(model => model.Username),",
+									"#@Html.IdFor(model => model.PlatformID),",
+									"#@Html.IdFor(model => model.FromDate),",
+									"#@Html.IdFor(model => model.ToDate),",
+									"#@Html.IdFor(model => model.DepositReturnFrom),",
+									"#@Html.IdFor(model => model.DepositReturnTo),",
+									"#@Html.IdFor(model => model.MemberRewardFrom),",
+									"#@Html.IdFor(model => model.MemberRewardTo),",
+									"#@Html.IdFor(model => model.ConsumptionFrom),",
+									"#@Html.IdFor(model => model.ConsumptionTo),",
+									"#@Html.IdFor(model => model.HonoraryCitizenRewardFrom),",
+									"#@Html.IdFor(model => model.HonoraryCitizenRewardTo),",
+									"#@Html.IdFor(model => model.TotalRewardFrom),",
+									"#@Html.IdFor(model => model.TotalRewardTo)"
+									)
+								).keydown(function (event)
+								{
+									if (event.keyCode === 13) {
+										$("#search-txn").click();
+										return false;
+									}
+								});
+
+                            });
+
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

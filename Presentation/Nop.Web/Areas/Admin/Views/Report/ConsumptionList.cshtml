@@ -1,0 +1,436 @@
+﻿@model ReportListModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var decimalplace = "n" + MspHelper.GetGlobalMBTCDecimalPlace(); //RW 20180712 MDT-128
+
+    //page title
+    ViewBag.Title = T("Admin.Report.DepositDepositReturnedConsumption").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Deposit, Deposit Returned and Consumption");
+}
+
+<style>
+    input[type="radio"] {
+        margin: 0 10px 0 10px;
+    }
+
+    .rdb {
+        padding-top: 10px;
+    }
+</style>
+
+<nop-antiforgery-token />
+<form asp-controller="Report" asp-action="ConsumptionList" method="post">
+	<div class="content-header clearfix">
+		<h1 class="pull-left">
+			@T("Admin.Report.DepositDepositReturnedConsumption")
+		</h1>
+		<!--//Jerry 20181219 MDT-160 \/-->
+		@*<div class="pull-right">
+			<div class="btn-group">
+				<button type="button" class="btn btn-success">
+					<i class="fa fa-download"></i>
+					@T("Admin.Common.Export")
+				</button>
+				<button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					<span class="caret"></span>
+					<span class="sr-only">&nbsp;</span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li>
+						<button type="submit" name="exportcsv">
+							<i class="fa fa-file-text-o"></i>
+							@T("Admin.Common.ExportToCsv")
+						</button>
+					</li>
+				</ul>
+				@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_withdrawal_list_buttons" })
+			</div>
+		</div>*@
+		<!--//Jerry 20181219 MDT-160 /\-->
+		@* 20181231 WKK MSP-620		Export Excel - Report page export button *@
+		<div class="pull-right">
+			<button type="submit" name="exportcsv" class="btn bg-green">
+				<i class="fa fa-download"></i>
+				@T("Admin.Common.ExportToCsv")
+			</button>
+			@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_consumption_list_buttons" })
+		</div>
+		@* 20181231 WKK MSP-620		Export Excel - Report page export button *@
+	</div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <!-- Search Panel [S] -->
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateFrom" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        @*<nop-editor asp-for="DateFrom" asp-required="true" />*@
+                                        <input id="DateFrom" name="DateFrom" style="width: 100%;" value="@Model.DateFrom.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateTo" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        @*<nop-editor asp-for="DateTo" asp-required="true" />*@
+                                        <input id="DateTo" name="DateTo" style="width: 100%;" value="@Model.DateTo.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Frequency" />
+                                    </div>
+                                    <div class="col-md-8 rdb">
+                                        @foreach (var item in Model.ReportfrequencyList)
+                                        {
+                                            @*@Html.RadioButton("rbFrequency", item.FrequencyValue)*@ //Jerry 20181219 MDT-160
+                                            @Html.RadioButtonFor(m => m.Frequency, item.FrequencyValue) //Jerry 20181219 MDT-160
+                                            @Html.Label("", T(item.FrequencyName).Text)
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-7 col-md-offset-5">
+                                        <button type="button" id="filter-status" class="btn btn-primary btn-dropbox">
+                                            <i class="fa fa-search"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="report-grid"></div>
+
+                <script type="text/javascript">
+
+                    $(document).ready(function () {
+
+                        $(function () {
+                            //var $radios = $('input:radio[name=rbFrequency]'); //Jerry 20181219 MDT-160
+                            var $radios = $('input:radio[name=Frequency]'); //Jerry 20181219 MDT-160
+                            if ($radios.is(':checked') === false) {
+                                $radios.filter('[value=1]').prop('checked', true);
+                            }
+                        }); //RW MSP-231 20180410
+
+                        $("#DateFrom").kendoDatePicker({
+                            //value: "2018-09-10",
+                            dateInput: true,
+                            format: "yyyy-MM-dd"
+                        });
+
+                        $("#DateTo").kendoDatePicker({
+                            //value: "2018-09-10",
+                            dateInput: true,
+                            format: "yyyy-MM-dd"
+                        });
+
+                        $('#filter-status').click(function () {
+                            //Atiqah 20181009 MSP-257 \/
+                            var dtFrom = $('#@Html.IdFor(model => model.DateFrom)').val();
+                            var dtTo = $('#@Html.IdFor(model => model.DateTo)').val();
+
+                            if (dtFrom == '' || dtTo == '')
+                            {
+                                alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                return;
+                            }
+
+                            var dtFrom1 = new Date(dtFrom);
+                            var dtTo1 = new Date(dtTo);
+
+                            if (dtTo1 < dtFrom1)
+                            {
+                                alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                return;
+                            }
+                            //Atiqah 20181009 MSP-257 /\
+
+                            if (ReportadditionalData().Frequency == 1)
+                            {
+                                $("#report-grid").empty();
+                                daily();
+                            }
+                            else if (ReportadditionalData().Frequency == 2)
+                            {
+                                $("#report-grid").empty();
+                                weekly();
+                            }
+                            else if (ReportadditionalData().Frequency == 3)
+                            {
+                                $("#report-grid").empty();
+                                monthly();
+                            }
+
+                            return false;
+                        });
+
+                    });
+
+                    function ReportadditionalData() {
+                        var data = {
+                            //Frequency: $('[name="rbFrequency"]:radio:checked').val(), //Jerry 20181219 MDT-160
+                            Frequency: $('[name="Frequency"]:radio:checked').val(), //Jerry 20181219 MDT-160
+                            DateFrom: $('#@Html.IdFor(model => model.DateFrom)').val(),
+                            DateTo: $('#@Html.IdFor(model => model.DateTo)').val(),
+                        };
+                        addAntiForgeryToken(data);
+                        return data;
+                    }
+
+                    function daily() {
+
+                        $("#report-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ConsumptionList", "Report"))", //ActionName and Controller
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: ReportadditionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        fields: {
+                                            Date: { editable: false, type: "string" }, //RW 20180712 MDT-128
+                                            MBTC_Deposit: { editable: false, type: "number" },
+                                            MBTC_Deposit_Return: { editable: false, type: "number" },
+                                            MBTC_Consumption: { editable: false, type: "number" }
+                                        }
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: true,
+                            columns: [
+                                {
+                                    field: "Date",
+                                    title: "@T("Admin.Report.Fields.Date")",
+                                    width: 9,
+                                    //format: "{0: yyyy-MM-dd}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Deposit",
+                                    title: "@T("Admin.Report.Fields.MbtcDeposit")",
+                                    width: 25,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Deposit_Return",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcDepositReturn")",
+                                    width: 25,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Consumption",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcConsumption")",
+                                    width: 25,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                }
+                            ]
+                        });
+                    }
+
+                    function weekly() {
+
+                        $("#report-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ConsumptionList", "Report"))", //ActionName and Controller
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: ReportadditionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        fields: {
+                                            StartDate: { editable: false, type: "string" }, //RW 20180712 MDT-128
+                                            EndDate: { editable: false, type: "string" }, //RW 20180712 MDT-128
+                                            MBTC_Deposit: { editable: false, type: "number" },
+                                            MBTC_Deposit_Return: { editable: false, type: "number" },
+                                            MBTC_Consumption: { editable: false, type: "number" }
+                                        }
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "StartDate",
+                                    title: "@T("Admin.Report.Fields.StartDate")",
+                                    width: 20,
+                                    //format: "{0: yyyy-MM-dd}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "EndDate",
+                                    title: "@T("Admin.Report.Fields.EndDate")",
+                                    width: 20,
+                                    //format: "{0: yyyy-MM-dd}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Deposit",
+                                    title: "@T("Admin.Report.Fields.MbtcDeposit")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Deposit_Return",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcDepositReturn")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Consumption",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcConsumption")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                }
+                            ]
+                        });
+                    }
+
+                    function monthly() {
+
+                        $("#report-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    refresh: true,
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ConsumptionList", "Report"))", //ActionName and Controller
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: ReportadditionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        fields: {
+                                            Month: { editable: false, type: "string" },
+                                            Year: { editable: false, type: "string" },
+                                            MBTC_Deposit: { editable: false, type: "number" },
+                                            MBTC_Deposit_Return: { editable: false, type: "number" },
+                                            MBTC_Consumption: { editable: false, type: "number" }
+                                        }
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: false,
+                            columns: [
+                                {
+                                    field: "Month",
+                                    title: "@T("Admin.Report.Fields.Month")",
+                                    width: 20
+                                },
+                                {
+                                    field: "Year",
+                                    title: "@T("Admin.Report.Fields.Year")",
+                                    width: 20
+                                },
+                                {
+                                    field: "MBTC_Deposit",
+                                    title: "@T("Admin.Report.Fields.MbtcDeposit")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Deposit_Return",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcDepositReturn")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                },
+                                {
+                                    field: "MBTC_Consumption",
+                                    title: "@T("Admin.Report.DepositDepositReturnedConsumption.Fields.MbtcConsumption")",
+                                    width: 20,
+                                    format: "{0:@decimalplace}" //RW 20180712 MDT-128
+                                }
+                            ]
+                        });
+                    }
+                </script>
+
+            </div>
+        </div>
+    </div>
+</form>

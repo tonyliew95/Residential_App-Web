@@ -1,0 +1,305 @@
+﻿@model AnnouncementsModel
+
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_announcement_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentTitle" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ContentTitle" asp-required="true" />
+                    <span asp-validation-for="ContentTitle"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Content" />
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group input-group-required">
+                        <nop-editor asp-for="Content" asp-template="RichEditor" />
+                        <div class="input-group-btn">
+                            <nop-required />
+                        </div>
+                    </div>
+                    <span asp-validation-for="Content"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="StartDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="StartDate" />
+                    <span asp-validation-for="StartDate"></span>
+                </div>
+            </div>
+
+            @*RW 2018-12-10 MDT-131*@
+            @*//Tony Liew 20181130 MDT-114 \/*@
+            @*@if (Model.IsShutDownDate)
+        {
+            <script>
+                $(document).ready(function () {
+
+                    var t = $('#@Html.IdFor(model => model.IsShutDownDate)').val();
+
+                    if (t) {
+                        $("#shutdownDate").show();
+                        $("#EndDateText").show();
+                        $("#EndDateGroup").hide();
+                    }
+                });
+            </script>
+        }
+        else
+        {
+            <script>
+                $(document).ready(function () {
+
+                    var t = $('#@Html.IdFor(model => model.IsShutDownDate)').val();
+
+                    if (t) {
+                        $("#shutdownDate").hide();
+                        $("#EndDateText").hide();
+                        $("#EndDateGroup").show();
+                    }
+                });
+            </script>
+        }*@
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="EndDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EndDate" />
+                    <span asp-validation-for="EndDate"></span>
+                </div>
+            </div>
+
+            @*RW 20181210 MDT-131*@
+            @*<div class="form-group" id="EndDateText">
+            @if (@Model.EndDate.HasValue)
+            {
+                <div class="col-md-3">
+                    <nop-label asp-for="EndDate" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row"> @Model.EndDate.Value.ToString("yyyy-MM-dd HH:mm") </div>
+                </div>
+            }
+        </div>*@
+            @*//Tony Liew 20181130 MDT-114 /\*@
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="IsPublished" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsPublished" />
+                    <span asp-validation-for="IsPublished"></span>
+                </div>
+            </div>
+
+            <!--//Jerry 20181015 MSP-338 \/-->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="OnlyVisibleToDepositUser" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="OnlyVisibleToDepositUser" />
+                    <span asp-validation-for="OnlyVisibleToDepositUser"></span>
+                </div>
+            </div>
+            <!--//Jerry 20181015 MSP-338 /\-->
+            @*Tony Liew 20181218 MDT-161 \/*@
+
+                @*<script>
+                var GRCLanding = @Model.IsGRCLanding.ToString().ToLower();
+                var MSLanding = @Model.IsMSLanding.ToString().ToLower();
+                
+                if (GRCLanding && MSLanding) {
+                    $(document).ready(function () {
+                        $("#MSPopUp").show();
+                        $("#GRCPopUp").show();
+                    });
+                }
+                else if (GRCLanding) {
+                    $(document).ready(function () {
+                        $("#MSPopUp").hide();
+                        $("#GRCPopUp").show();
+                    });
+                }
+                else if (MSLanding) {
+                    $(document).ready(function () {
+                        $("#MSPopUp").show();
+                        $("#GRCPopUp").hide();
+                    });
+                }
+                else {
+                    $(document).ready(function () {
+                        $("#MSPopUp").hide();
+                        $("#GRCPopUp").hide();
+                    });
+                }
+                </script>*@
+
+            @* WilliamHo 20181227 MDT-185 \/ **@
+            @*<script>
+                var GRCLanding = @Model.IsGRCLanding.ToString().ToLower();
+                var MSLanding = @Model.IsMSLanding.ToString().ToLower();
+
+                if (GRCLanding) {
+                    $(document).ready(function () {
+                        $("#GRCPopUp").show();
+                    });
+                }
+                else {
+                    $(document).ready(function () {
+                        $("#GRCPopUp").hide();
+                    });
+                }
+
+                if (MSLanding) {
+                    $(document).ready(function () {
+                        $("#MSPopUp").show();
+
+                    });
+                }
+                else {
+                    $(document).ready(function () {
+                        $("#MSPopUp").hide();
+                    });
+
+                }
+
+            </script>
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="IsGRCLanding" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsGRCLanding" />
+                    <span asp-validation-for="IsGRCLanding"></span>
+                </div>
+
+                <div id="GRCPopUp">
+                    <div class="col-md-3">
+                        <nop-label asp-for="IsGRCPopUp" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="IsGRCPopUp" />
+                        <span asp-validation-for="IsGRCPopUp"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <nop-label asp-for="IsMSLanding" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsMSLanding" />
+                    <span asp-validation-for="IsMSLanding"></span>
+                </div>
+
+                <div id="MSPopUp">
+                    <div class="col-md-3">
+                        <nop-label asp-for="IsMSPopUp" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="IsMSPopUp" />
+                        <span asp-validation-for="IsMSPopUp"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <nop-label asp-for="IsMSInformation" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsMSInformation" />
+                    <span asp-validation-for="IsMSInformation"></span>
+                </div>
+            </div>
+
+            <script>
+                $("#IsGRCLanding").click(function () {
+                    var t = $("#IsGRCLanding").is(":checked");
+                    if (t) {
+                        $("#GRCPopUp").show();
+                    }
+                    else {
+                        $("#GRCPopUp").hide();
+                    }
+                });
+
+                $("#IsMSLanding").click(function () {
+                    var t = $("#IsMSLanding").is(":checked");
+                    if (t) {
+                        $("#MSPopUp").show();
+                    }
+                    else {
+                        $("#MSPopUp").hide();
+                    }
+                });
+            </script>*@
+            @* WilliamHo 20181227 MDT-185 /\ **@
+
+            @*Tony Liew 20181218 MDT-161 /\*@
+
+            @*//Tony Liew 20181130 MDT-114 \/*@
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="IsShutDownDate" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="IsShutDownDate" />
+                <span asp-validation-for="IsShutDownDate"></span>
+            </div>
+        </div>
+
+
+        <div id="shutdownDate">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShutDownStartDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShutDownStartDate" asp-required="true" />
+                    <span asp-validation-for="ShutDownStartDate"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ShutDownEndDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ShutDownEndDate" asp-required="true" />
+                    <span asp-validation-for="ShutDownEndDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $("#IsShutDownDate").click(function () {
+                var t = $("#IsShutDownDate").is(":checked");
+                if (t) {
+                    $("#shutdownDate").show();
+                    $("#EndDateGroup").hide();
+                    $("#EndDateText").show();
+                }
+                else {
+                    $("#shutdownDate").hide();
+                    $("#EndDateGroup").show();
+                    $("#EndDateText").hide();
+                }
+            });
+        </script>*@
+
+            @*Tony Liew 20181130 MDT-114 /\*@
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_announcement_details_info_bottom", additionalData = Model.Id })
+</div>

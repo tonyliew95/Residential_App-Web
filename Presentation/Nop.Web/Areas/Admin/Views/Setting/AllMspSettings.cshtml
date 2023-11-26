@@ -1,0 +1,221 @@
+﻿@model AllMspSettingsListModel
+@inject AdminAreaSettings adminAreaSettings
+@*// Tony Liew 20181204 MDT-122 \/*@
+@using System.Text.Encodings.Web
+@using Nop.Core.Enumeration
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    //page title
+    ViewBag.Title = T("Admin.Configuration.Settings.AllMSPSettings").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("All MSP settings");
+}
+
+<nop-antiforgery-token />
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.Configuration.Settings.AllMSPSettings")
+    </h1>
+    <div class="pull-right">
+        &nbsp;
+        @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_all_setting_list_buttons" })
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_all_settings_top" })
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <nop-label asp-for="SearchSettingName" />
+                                </div>
+                                <div class="col-md-8">
+                                    <nop-editor asp-for="SearchSettingName" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <nop-label asp-for="SearchSettingValue" />
+                                </div>
+                                <div class="col-md-8">
+                                    <nop-editor asp-for="SearchSettingValue" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-md-offset-4">
+                                    <button type="button" id="search-msp-settings" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="msp-settings-grid"></div>
+
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $("#msp-settings-grid").kendoGrid({
+                                dataSource: {
+                                    type: "json",
+                                    transport: {
+                                        read: {
+                                            url: "@Html.Raw(Url.Action("AllMSPSettings", "Setting"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: additionalData
+                                        },
+                                        update: {
+                                            url: "@Html.Raw(Url.Action("MspSettingUpdate", "Setting"))",
+                                            type: "POST",
+                                            dataType: "json",
+                                            data: addAntiForgeryToken
+                                        }
+                                    },
+                                    schema: {
+                                        data: "Data",
+                                        total: "Total",
+                                        errors: "Errors",
+                                        model: {
+                                            id: "Id",
+                                            fields: {
+                                                SettingKey: { editable: false, type: "string" },
+                                                SettingValue: { editable: true, type: "string" },
+                                                Description: { editable: true, type: "string" },
+                                                Status: { editable: true, type: "string" },
+                                                Id: { editable: false, type: "number" }
+                                            }
+                                        }
+                                    },
+                                    requestEnd: function(e) {
+                                        if (e.type == "create" || e.type == "update") {
+                                            this.read();
+                                        }
+                                    },
+                                    error: function(e) {
+                                        display_kendoui_grid_error(e);
+                                        // Cancel the changes
+                                        this.cancelChanges();
+                                    },
+                                    pageSize: @(defaultGridPageSize),
+                                    serverPaging: true,
+                                    serverFiltering: true,
+                                    serverSorting: true
+                                },
+                                pageable: {
+                                    refresh: true,
+                                    pageSizes: [@(gridPageSizes)],
+                                    @await Html.PartialAsync("_GridPagerMessages")
+                                },
+
+                                editable: {
+                                    confirmation: "@T("Admin.Common.DeleteConfirmation")",
+                                    mode: "inline"
+                                },
+                                scrollable: false,
+                                columns: [
+                                    {
+                                        field: "SettingKey",
+                                        title: "@T("Admin.Configuration.Settings.AllSettings.Fields.SettingKey")",
+                                        width: 300
+                                    }, {
+                                        field: "SettingValue",
+                                        title: "@T("Admin.Configuration.Settings.AllSettings.Fields.SettingValue")",
+                                        width: 200
+                                    }, {
+                                        field: "Description",
+                                        title: "@T("Admin.Configuration.Settings.AllSettings.Fields.Description")",
+                                        width: 300,
+                                    }, {
+                                        field: "Status",
+                                        title: "@T("Admin.Configuration.Settings.AllSettings.Fields.Status")",
+                                        width: 100,
+                                        editor: storeDropDownEditor,
+                                    },
+
+                                    {
+                                        command: [
+                                            {
+                                                name: "edit",
+                                                text: {
+                                                    edit: "@T("Admin.Common.Edit")",
+                                                    update: "@T("Admin.Common.Update")",
+                                                    cancel: "@T("Admin.Common.Cancel")"
+                                                }
+                                            }
+                                        ],
+                                        width: 200
+                                    }
+                                ]
+                            });
+                        });
+
+                           //local datasource
+                        var allMspSetting = [
+                            {
+                                Id: 0,
+                                Status: "@T("Admin.Configuration.Settings.AllSettings.Fields.Status.Active")"
+                            }
+                           ,{
+                                Id: 1,
+                                Status: "@T("Admin.Configuration.Settings.AllSettings.Fields.Status.Inactive")"
+                            }
+                        ];
+
+                        function storeDropDownEditor(container, options) {
+                            $('<input required data-text-field="Status" data-value-field="Status" data-bind="value:Status"/>')
+                                .appendTo(container)
+                                .kendoDropDownList({
+                                    autoBind: false,
+                                    dataSource: allMspSetting
+                                });
+                        }
+
+                    </script>
+
+                    <script type="text/javascript">
+                        $(document).ready(function() {
+                            $('#search-msp-settings').click(function() {
+                                var grid = $('#msp-settings-grid').data('kendoGrid');
+                                grid.dataSource.page(1);
+                                return false;
+                            });
+                        });
+
+                        function additionalData() {
+                            var data = {
+                                SearchSettingName: $('#@Html.IdFor(model => model.SearchSettingName)').val(),
+                                SearchSettingValue: $('#@Html.IdFor(model => model.SearchSettingValue)').val()
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                        }
+
+                        $("".concat("#@Html.IdFor(model => model.SearchSettingName),",
+                            "#@Html.IdFor(model => model.SearchSettingValue)")).keydown(function(event) {
+                                if (event.keyCode === 13) {
+                                    $("#search-settings").click();
+                                    return false;
+                                }
+                            });
+                    </script>
+                </div>
+            </div>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_all_settings_bottom" })
+        </div>
+    </div>
+</div>
+@*// Tony Liew 20181204 MDT-122 /\*@

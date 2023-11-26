@@ -1,0 +1,34 @@
+﻿@model UserGuidesModel
+@*Tony Liew 20181217 MDT-142 \/*@
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_userguides_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentTittleChinese" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ContentTittleChinese" asp-required="true" />
+                    <span asp-validation-for="ContentTittleChinese"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentChinese" />
+                </div>
+                <div class="col-md-9">
+                    <div class="input-group input-group-required">
+                        <nop-editor asp-for="ContentChinese" asp-template="RichEditor" />
+                        <div class="input-group-btn">
+                            <nop-required />
+                        </div>
+                    </div>
+                    <span asp-validation-for="ContentChinese"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_userguides_details_info_bottom", additionalData = Model.Id })
+</div>
+@*Tony Liew 20181217 MDT-142 /\*@

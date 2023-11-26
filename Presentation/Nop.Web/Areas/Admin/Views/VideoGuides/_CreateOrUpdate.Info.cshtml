@@ -1,0 +1,104 @@
+﻿@model VideoGuideModel
+
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_videoguides_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="ContentName" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ContentName" asp-required="true" />
+                <span asp-validation-for="ContentName"></span>
+            </div>
+        </div>*@
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentTitle" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ContentTitle" asp-required="true" />
+                    <span asp-validation-for="ContentTitle"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentTittleChinese" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ContentTittleChinese" asp-required="true" />
+                    <span asp-validation-for="ContentTittleChinese"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="ContentUrl" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ContentUrl" asp-required="true" />
+                    <span asp-validation-for="ContentUrl"></span>
+                </div>
+            </div>
+            @*Tony Liew 20181217 MDT-143 \/*@
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Content" />
+            </div>
+            <div class="col-md-9">
+                <div class="input-group input-group-required">
+                    <nop-editor asp-for="Content" asp-template="RichEditor" />
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+                <span asp-validation-for="Content"></span>
+            </div>
+        </div>*@
+            @*Tony Liew 20181217 MDT-143 /\*@
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="StartDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="StartDate" />
+                    <span asp-validation-for="StartDate"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="EndDate" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="EndDate" />
+                    <span asp-validation-for="EndDate"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="IsPublished" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsPublished" />
+                    <span asp-validation-for="IsPublished"></span>
+                </div>
+            </div>
+            <!--//Jerry 20181015 MSP-341 \/-->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="OnlyVisibleToDepositUser" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="OnlyVisibleToDepositUser" />
+                    <span asp-validation-for="OnlyVisibleToDepositUser"></span>
+                </div>
+            </div>
+            <!--//Jerry 20181015 MSP-341 /\-->
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_videoguides_details_info_bottom", additionalData = Model.Id })
+</div>

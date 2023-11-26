@@ -1,0 +1,15 @@
+﻿@model DateTime?;
+@using Nop.Services.Helpers;
+@{
+    //var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUIDateFormat", "yyyy-MM-dd");
+    var dateFormat = "HH:mm";
+}
+
+<input id="@Html.IdForModel()" name="@Html.NameForModel()" value="@(Model > DateTime.MinValue || Model.HasValue ? Model.Value.ToString(dateFormat) : null)" />
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#@Html.IdForModel()").kendoTimePicker({
+            format: "@dateFormat"
+        });
+    });
+</script>

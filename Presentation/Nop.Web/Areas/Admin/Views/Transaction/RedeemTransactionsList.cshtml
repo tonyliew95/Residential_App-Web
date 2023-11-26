@@ -1,0 +1,280 @@
+﻿@model RedeemTransactionsListModel
+@inject AdminAreaSettings adminAreaSettings
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.RedeemTransactions").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Redeem");
+}
+
+<form asp-controller="Transaction" asp-action="RedeemTransactionsList" method="post">
+	<div class="content-header clearfix">
+		<h1 class="pull-left">
+			@T("Admin.TransactionList.RedeemTransactions")
+		</h1>
+
+		@* 20181219 WKK MDT-156		MDT-136 MSP requirement 1.2 > Export function to CSV > Transaction Listing → Locked Earning *@
+		<div class="pull-right">
+			<button type="submit" name="exportcsvallredeem" class="btn bg-green">
+				<i class="fa fa-download"></i>
+				@T("Admin.Common.ExportToCsv")
+			</button>
+			@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_list_redeem_buttons" })
+		</div>
+		@* 20181219 WKK  MDT-156		MDT-136 MSP requirement 1.2 > Export function to CSV > Transaction Listing → Locked Earning *@
+
+	</div>
+
+    <div class="content">
+		<div class="form-horizontal">
+			<div class="panel-group">
+				<div class="panel panel-default panel-search">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-5">
+								<div class="form-group">
+									<div class="col-md-4">
+										<nop-label asp-for="Username" />
+									</div>
+									<div class="col-md-8">
+										<nop-editor asp-for="Username" />
+									</div>
+								</div>
+								@*<div class="form-group">
+							<div class="col-md-4">
+								<nop-label asp-for="Username" />
+							</div>
+							<div class="col-md-8">
+								<nop-editor asp-for="Username" />
+							</div>
+						</div>*@
+							</div>
+							<div class="col-md-7">
+								<div class="form-group">
+									<div class="col-md-4">
+										<nop-label asp-for="AvailableBalanceFrom" />
+									</div>
+									<div class=" col-md-8">
+										<nop-editor asp-for="AvailableBalanceFrom" />
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-md-4">
+										<nop-label asp-for="AvailableBalanceTo" />
+									</div>
+									<div class=" col-md-8">
+										<nop-editor asp-for="AvailableBalanceTo" />
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-md-4">
+										<nop-label asp-for="RedeemWalletBalanceFrom" />
+									</div>
+									<div class=" col-md-8">
+										<nop-editor asp-for="RedeemWalletBalanceFrom" />
+									</div>
+								</div>
+								<div class="form-group">
+									<div class="col-md-4">
+										<nop-label asp-for="RedeemWalletBalanceTo" />
+									</div>
+									<div class=" col-md-8">
+										<nop-editor asp-for="RedeemWalletBalanceTo" />
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-7 col-md-offset-5">
+									<button type="button" id="search-txn" class="btn btn-primary btn-search">
+										<i class="fa fa-search"></i>
+										@T("Admin.Common.Search")
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Search Panel [E] -->
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<div id="txn-grid"></div>
+					<!-- retrieve data block start -->
+					<script type="text/javascript">
+                            $(document).ready(function () {
+                                //wailiang 20181002 MSP-190 \/
+                                function redeem() {
+                                $("#txn-grid").kendoGrid({
+                                    dataSource: {
+                                        type: "json",
+                                        transport: {
+                                            read: {
+                                                url: "@Html.Raw(Url.Action("RedeemTransactionsList", "Transaction"))", //ActionName and Controller
+                                                type: "POST",
+                                                dataType: "json",
+                                                data: additionalData
+                                            }
+                                        },
+                                        schema: { //handle data return from controller
+                                            data: "Data",
+                                            total: "Total",
+                                            errors: "Errors",
+                                            model: {
+                                                //id: "Id",
+                                                fields: {
+                                                    //Id: { editable: false, type: "number" },
+                                                    Username: { editable: false, type: "string" },
+                                                    //WalletID: { editable: false, type: "string" },
+                                                    AvailableBalance: { editable: false, type: "string" },
+                                                    RedeemWalletBalance: { editable: false, type: "string" }
+                                                }
+                                            }
+                                        },
+                                        error: function(e) {
+                                            display_kendoui_grid_error(e);
+                                            // Cancel the changes
+                                            this.cancelChanges();
+                                        },
+                                        pageSize: @(defaultGridPageSize),
+                                        serverPaging: true,
+                                        serverFiltering: true,
+                                        serverSorting: true
+                                    },
+                                    pageable: {
+                                        refresh: true,
+                                        pageSizes: [@(gridPageSizes)],
+                                        @await Html.PartialAsync("_GridPagerMessages")
+                                    },
+                                    scrollable: false,
+                                    columns: [
+                                        //{
+                                        //    field: "Id",
+                                        //    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                        //    headerAttributes: { style: "text-align:center" },
+                                        //    attributes: { style: "text-align:center" },
+                                        //    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                        //    width: 50
+                                        //},
+                                        {
+                                            field: "Username",
+                                            title: "@T("Admin.TransactionList.RedeemTransactions.Fields.Username")",
+                                            width: 500
+                                        },
+                                        {
+                                            field: "AvailableBalance",
+                                            title: "@T("Admin.TransactionList.RedeemTransactions.Fields.AvailableBalance")",
+                                            width: 250
+                                        },
+                                        {
+                                            field: "RedeemWalletBalance",
+                                            title: "@T("Admin.TransactionList.RedeemTransactions.Fields.RedeemWalletBalance")",
+                                            width: 250
+                                        },
+                                    ]
+                                    });
+                                }
+
+                                $('#search-txn').click(function () {
+                                    var grid = $('#txn-grid').data('kendoGrid');
+
+                                    //Jerry 20181016 MSP-352 \/
+                                    //ValidateAllNumberField(); //Jerry 20181029 MSP-352
+
+                                    //Jerry 20181018 MSP-352 \/
+                                    //if (validateInput() == false) {
+                                    //    return;
+                                    //}
+                                    //Jerry 20181018 MSP-352 /\
+                                    //Jerry 20181016 MSP-352 /\
+
+                                    redeem();
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+                                    //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                    //clear selected checkboxes
+                                    //$('.checkboxGroups').attr('checked', false).change();
+                                    //selectedIds = [];
+                                    return false;
+                                });
+
+                                function validateInput() //Jerry 20181016 MSP-352
+                                {
+                                    //var OldPassword = $("#OldPassword").val();
+                                    var Username = $("#@Html.IdFor(model => model.Username)").val();
+                                    var AvailableBalanceFrom = $("#@Html.IdFor(model => model.AvailableBalanceFrom)").val();
+                                    var AvailableBalanceTo = $("#@Html.IdFor(model => model.AvailableBalanceTo)").val();
+                                    var RedeemWalletBalanceFrom = $("#@Html.IdFor(model => model.RedeemWalletBalanceFrom)").val();
+                                    var RedeemWalletBalanceTo = $("#@Html.IdFor(model => model.RedeemWalletBalanceTo)").val();
+
+                                    if (Username.trim() == ''
+                                        && AvailableBalanceFrom.trim() == ''
+                                        && AvailableBalanceTo.trim() == ''
+                                        && RedeemWalletBalanceFrom.trim() == ''
+                                        && RedeemWalletBalanceTo.trim() == ''
+                                    ) {
+                                        alert('Please fill up at least one searching criteria to proceed.');
+                                        return false;
+                                    }
+
+                                    return true;
+                                }
+
+                                function isNumeric(n) //Jerry 20181016 MSP-352
+                                {
+                                    return !isNaN(parseFloat(n)) && isFinite(n);
+                                }
+
+                                function ValidateNumberField(FieldName) //Jerry 20181016 MSP-352
+                                {
+                                    var FieldValue = $('#' + FieldName).val();
+
+                                    if ((isNumeric(FieldValue) == false) || (FieldValue < 0))
+                                        $('#' + FieldName).val('');
+                                }
+
+                                function ValidateAllNumberField() //Jerry 20181016 MSP-352
+                                {
+                                    ValidateNumberField('AvailableBalanceFrom');
+                                    ValidateNumberField('AvailableBalanceTo');
+                                    ValidateNumberField('RedeemWalletBalanceFrom');
+                                    ValidateNumberField('RedeemWalletBalanceTo');
+                                }
+
+                                function additionalData() {
+                                var data = {
+                                    Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                    AvailableBalanceFrom: $('#@Html.IdFor(model => model.AvailableBalanceFrom)').val(),
+                                    AvailableBalanceTo: $('#@Html.IdFor(model => model.AvailableBalanceTo)').val(),
+                                    RedeemWalletBalanceFrom: $('#@Html.IdFor(model => model.RedeemWalletBalanceFrom)').val(),
+                                    RedeemWalletBalanceTo: $('#@Html.IdFor(model => model.RedeemWalletBalanceTo)').val()
+                                };
+                                addAntiForgeryToken(data);
+                                return data;
+								}
+
+								//search button
+								$("".concat(
+									"#@Html.IdFor(model => model.Username),",
+									"#@Html.IdFor(model => model.AvailableBalanceFrom),",
+									"#@Html.IdFor(model => model.AvailableBalanceTo),",
+									"#@Html.IdFor(model => model.RedeemWalletBalanceFrom),",
+									"#@Html.IdFor(model => model.RedeemWalletBalanceTo)"
+									)
+								).keydown(function (event)
+								{
+									if (event.keyCode === 13) {
+										$("#search-txn").click();
+										return false;
+									}
+								});
+                            });
+                            //wailiang 20181002 MSP-190 /\
+					</script>
+				</div>
+			</div>
+		</div>
+    </div>
+</form>

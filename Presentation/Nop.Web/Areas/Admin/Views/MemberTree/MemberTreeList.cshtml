@@ -1,0 +1,281 @@
+﻿@model Nop.Web.Areas.Admin.Models.MemberTree.MemberTreeModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss");
+
+    //page title
+    ViewBag.Title = T("Admin.MemberTree.Title").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Member Tree");
+}
+
+<nop-antiforgery-token />
+<form asp-controller="MemberTree" asp-action="MemberTreeList" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.MemberTree.Title")
+        </h1>
+        @*<div class="pull-right">
+                <a asp-action="Create" class="btn bg-blue">
+                    <i class="fa fa-plus-square"></i>
+                    @T("Admin.Common.AddNew")
+                </a>
+                @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_discount_list_buttons" })
+            </div>*@
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            @*<div class="col-md-6">*@
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <nop-label asp-for="Username" />
+                                </div>
+                                <div class="col-md-8">
+                                    <nop-editor asp-for="Username" />
+                                </div>
+                            </div>
+                            <div class=" form-group">
+                                <div class="col-md-4">
+                                    <nop-label asp-for="GlobalGuid" />
+                                </div>
+                                <div class="col-md-8">
+                                    @*<nop-editor asp-for="TxnId" />*@
+                                    <input id="GlobalGuid" type="text" name="TxnId" class="col-md-8 form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <nop-label asp-for="IntroducerGlobalGuid" />
+                                </div>
+                                <div class="col-md-8">
+                                    @*<nop-editor asp-for="TopUpAmt" />*@
+                                    <input id="IntroducerGlobalGuid" type="text" name="TopUpAmt" class="col-md-8 form-control">
+                                </div>
+                            </div>
+                            @*</div>*@
+
+                            @*RW 20181227 MSP-608*@
+                            @*<div class="col-md-6">
+            <div class="form-group">
+                <div class="col-md-4">
+                    <nop-label asp-for="DateFrom" />
+                </div>
+                <div class=" col-md-8">
+                    <nop-editor asp-for="DateFrom" />
+                </div>
+            </div>
+            <div class=" form-group">
+                <div class="col-md-4">
+                    <nop-label asp-for="DateTo" />
+                </div>
+                <div class=" col-md-8">
+                    <nop-editor asp-for="DateTo" />
+                </div>
+            </div>
+        </div>*@
+                            @*RW 20181227 MSP-608*@
+
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div id="txn-grid"></div>
+                            <script type="text/javascript">
+                        $(document).ready(function () {
+                            function memberTree() {
+                                $("#txn-grid").kendoGrid({
+                                        dataSource: {
+                                            type: "json",
+                                            transport: {
+                                                read: {
+                                                    url: "@Html.Raw(Url.Action("MemberTreeList", "MemberTree"))",
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: additionalData
+                                                }
+                                            },
+                                            schema: {
+                                                data: "Data",
+                                                total: "Total",
+                                                errors: "Errors"
+                                                @*model: {
+                                                    //id: "Id",
+                                                    fields: {
+                                                        //Id: { editable: false, type: "number" },
+                                                        Username: { editable: false, type: "string" },
+                                                        CreatedOnUtc: { editable: false, type: "date" },
+                                                        GlobalGuid: { editable: false, type: "string" },
+                                                        IntroducerGlobalGuid: { editable: false, type: "string" },
+                                                    }
+                                                }*@
+                                            },
+                                            error: function(e) {
+                                                display_kendoui_grid_error(e);
+                                                // Cancel the changes
+                                                this.cancelChanges();
+                                            },
+                                            pageSize: @(defaultGridPageSize),
+                                            serverPaging: true,
+                                            serverFiltering: true,
+                                            serverSorting: true
+                                        },
+                                        pageable: {
+                                            refresh: true,
+                                            //pageSizes : 3
+                                            pageSizes: [@(gridPageSizes)],
+                                            @await Html.PartialAsync("_GridPagerMessages"),
+                                        },
+                                        scrollable: false,
+                                        //dataBound: onDataBound,
+                                        columns: [
+                                            //{
+                                            //    field: "Id",
+                                            //    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                            //    headerAttributes: { style: "text-align:center" },
+                                            //    attributes: { style: "text-align:center" },
+                                            //    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                            //    width: 50
+                                            //},
+                                            {
+                                                field: "Username",
+                                                title: "@T("Admin.MemberTree.List.Fields.Username")",
+                                                width: 200,
+                                                //template: "<a href='javascript:list(#= JSON.stringify(CustomerId) #)'>Click here</a>"
+                                                template: '<a href="@Url.Content("~/Admin/MemberTree/GetCustomerDownLineList/")#=CustomerId#">#:Username#</a>'
+                                            },
+                                            {
+                                                field: "CreatedOnUtc",
+                                                title: "@T("Admin.MemberTree.List.Fields.JoiningDate")",
+                                                width: 200,
+                                                type: "date",
+                                                format: "{0:@dateFormat}"
+                                            },
+                                            {
+                                                field: "GlobalGuid",
+                                                title: "@T("Admin.MemberTree.List.Fields.GlobalGuid")",
+                                                width: 200
+                                            },
+                                            {
+                                                field: "IntroducerGlobalGuid",
+                                                title: "@T("Admin.MemberTree.List.Fields.IntroducerGlobalGuid")",
+                                                width: 200,
+                                            },
+                                            
+
+                                        ]
+                                    });
+                            }
+
+
+                            @*function list (CustomerID) {
+                                location.href = '@Url.Action("GetCustomerDownLineList", "MemberTree", new { CustomerId="CustomerID" })'.replace("CustomerID", parseInt(CustomerID));
+                            }*@
+
+                                $('#search-txn').click(function () {
+
+                                    var dtFrom = $('#@Html.IdFor(model => model.DateFrom)').val();
+                                    var dtTo = $('#@Html.IdFor(model => model.DateTo)').val();
+
+                                    if (dtFrom == '' || dtTo == '')
+                                    {
+                                        alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                        return;
+                                    }
+
+                                    var dtFrom1 = new Date(dtFrom);
+                                    var dtTo1 = new Date(dtTo);
+
+                                    if (dtTo1 < dtFrom1)
+                                    {
+                                        alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                        return;
+                                    }
+
+                                    memberTree();
+                                    var grid = $('#txn-grid').data('kendoGrid');
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+                                    //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                    return false
+                                });
+
+                            $("".concat("#@Html.IdFor(model => model.Username),",
+                                    "#@Html.IdFor(model => model.DateFrom),",
+                                    "#@Html.IdFor(model => model.DateTo),",
+                                    "#@Html.IdFor(model => model.GlobalGuid),",
+                                    "#@Html.IdFor(model => model.IntroducerGlobalGuid)",
+                                    )).keydown(function (event) {
+                                        if (event.keyCode === 13) {
+                                            $("#search-txn").click();
+                                            return false;
+                                        }
+                                    });
+
+                            });
+
+                            function additionalData()
+                            {
+                            var data = {
+                                Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                DateFrom: $('#@Html.IdFor(model => model.DateFrom)').val(),
+                                DateTo: $('#@Html.IdFor(model => model.DateTo)').val(),
+                                GlobalGuid: $('#@Html.IdFor(model => model.GlobalGuid)').val(),
+                                IntroducerGlobalGuid: $('#@Html.IdFor(model => model.IntroducerGlobalGuid)').val(),
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                            }
+                            @*Set Filtering*@
+
+
+                            //$("#DateFrom").kendoDatePicker({
+                            //    //value: "2018-09-10",
+                            //    dateInput: true,
+                            //    format: "yyyy-MM-dd"
+                            //});
+
+                            //$("#DateTo").kendoDatePicker({
+                            //    //value: kendo.toString(kendo.parseDate(dtTo1, 'MM/dd/yyyy')),
+                            //    dateInput: true,
+                            //    format: "yyyy-MM-dd"
+                            //});
+
+                                //search button
+
+
+
+
+                                    @*Kendo-Grid*@
+                            //});
+                            </script>
+
+
+                            @*<script type="text/javascript">
+
+
+                                </script>*@
+
+                        </div> @*grid panel-body*@
+                    </div>@*panel panel-default*@
+                </div>@*panel search*@
+            </div>@*panel-group*@
+        </div>@*form-horizontal*@
+    </div>@*content*@
+</form>

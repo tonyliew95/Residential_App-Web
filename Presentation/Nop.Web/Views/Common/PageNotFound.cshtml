@@ -1,0 +1,13 @@
+﻿@{
+    Layout = "_Root.Head";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.PageNotFound").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-not-found-page");
+}
+
+<div>
+    @await Component.InvokeAsync("AdminHeaderLinks")
+    <h1>Page Not Found! </h1>
+</div>

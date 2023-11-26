@@ -1,0 +1,81 @@
+﻿@model GrcAnnouncementsModel
+
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_grcannouncement_details_info_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+		<div class="panel-body">
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="Title_EN" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="Title_EN" asp-required="true" />
+					<span asp-validation-for="Title_EN"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="ShortDescription_EN" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="ShortDescription_EN" asp-required="true" />
+					<span asp-validation-for="ShortDescription_EN"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="Content1_EN" />
+				</div>
+				<div class="col-md-9">
+					<div class="input-group input-group-required">
+						<nop-editor asp-for="Content1_EN" asp-template="RichEditor" />
+						<div class="input-group-btn">
+							<nop-required />
+						</div>
+					</div>
+					<span asp-validation-for="Content1_EN"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="Content2_EN" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="Content2_EN" asp-required="false" />
+					<span asp-validation-for="Content2_EN"></span>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="StartDate" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="StartDate" />
+					<span asp-validation-for="StartDate"></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="EndDate" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="EndDate" />
+					<span asp-validation-for="EndDate"></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-md-3">
+					<nop-label asp-for="IsActive" />
+				</div>
+				<div class="col-md-9">
+					<nop-editor asp-for="IsActive" />
+					<span asp-validation-for="IsActive"></span>
+				</div>
+			</div>
+
+		</div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_grcannouncement_details_info_bottom", additionalData = Model.Id })
+</div>

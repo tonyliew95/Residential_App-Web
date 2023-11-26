@@ -1,0 +1,388 @@
+﻿@model DepositListModel
+@inject AdminAreaSettings adminAreaSettings
+
+@using System.Globalization;
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss");
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.Deposit").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Deposit");
+}
+<nop-antiforgery-token />
+<form asp-controller="Transaction" asp-action="TxnDepositList" method="post">
+	<div class="content-header clearfix">
+		<h1 class="pull-left">
+			@T("Admin.TransactionList.Deposit")
+		</h1>
+
+		@* MDT-154
+		MSP requirement 1.2 > Export function to CSV > Transaction Listing → Agency Fee *@
+		<div class="pull-right">
+			<button type="submit" name="exportcsvallagencyfee" class="btn bg-green">
+				<i class="fa fa-download"></i>
+				@T("Admin.Common.ExportToCsv")
+			</button>
+			@*<button type="button" id="exportcsv-selected" class="btn bg-green">
+				<i class="fa fa-download"></i>
+				@T("Admin.Common.ExportToCsv") ( @T("Admin.Common.Select") )
+			</button>*@
+			@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_list_agencyfee_buttons" })
+		</div>
+		@* MDT-154
+		MSP requirement 1.2 > Export function to CSV > Transaction Listing → Agency Fee *@
+
+		@*<div class="pull-right">
+			<div class="btn-group">
+				<button type="button" class="btn btn-success">
+					<i class="fa fa-download"></i>
+					@T("Admin.Common.Export")
+				</button>
+				<button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					<span class="caret"></span>
+					<span class="sr-only">&nbsp;</span>
+				</button>
+				<ul class="dropdown-menu" role="menu">
+					<li>
+						<button type="submit" name="exportxml-all">
+							<i class="fa fa-file-code-o"></i>
+							@T("Admin.Common.ExportToXml.All")
+						</button>
+					</li>
+					<li>
+						<button type="button" id="exportxml-selected">
+							<i class="fa fa-file-code-o"></i>
+							@T("Admin.Common.ExportToXml.Selected")
+						</button>
+					</li>
+					<li class="divider"></li>
+					<li>
+						<button type="submit" name="exportexcel-all">
+							<i class="fa fa-file-excel-o"></i>
+							@T("Admin.Common.ExportToExcel.All")
+						</button>
+					</li>
+					<li>
+						<button type="button" id="exportexcel-selected">
+							<i class="fa fa-file-excel-o"></i>
+							@T("Admin.Common.ExportToExcel.Selected")
+						</button>
+					</li>
+				</ul>
+				@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_customer_list_buttons" })
+			</div>
+		</div>*@
+	</div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Username" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Username" />
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TxnNo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        @*<nop-editor asp-for="TxnNo" />*@
+                                        <input id="TxnNo" type="text" name="TxnNo" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositAmt" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        @*<nop-editor asp-for="DepositAmt" />*@
+                                        <input id="DepositAmt" type="text" name="DepositAmt" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateFrom" />
+                                    </div>
+                                    <div class=" col-md-4">
+                                        <nop-editor asp-for="DateFrom" asp-required="true" />
+                                        @*<input id="DateFrom" style="width: 100%;" value="@Model.DateFrom.Value.ToString("yyyy-MM-dd")" />*@
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateTo" />
+                                    </div>
+                                    <div class=" col-md-4">
+                                        <nop-editor asp-for="DateTo" asp-required="true" />
+                                        @*<input id="DateTo" style="width: 100%;" value="@Model.DateTo.Value.ToString("yyyy-MM-dd")" />*@
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="StatusValue" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="StatusValue" asp-items="Model.Status" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search Panel [E] -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="txn-grid"></div>
+                    <!-- retrieve data block start -->
+					<script type="text/javascript">
+                    $(document).ready(function () {
+                        //wailiang 20181002 MSP-190 \/
+                        function deposit() {
+                            $("#txn-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("TxnDepositList", "Transaction"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: additionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        //id: "Id",
+                                        fields: {
+                                            //Id: { editable: false, type: "number" },
+                                            Username: { editable: false, type: "string" },
+                                            Date: { editable: false, type: "date" },
+                                            TxnNo: { editable: false, type: "int" },
+                                            DepositAmt: { editable: false, type: "decimal" },
+                                            Status: { editable: false, type: "string" }
+                                        }
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: false,
+                            //dataBound: onDataBound,
+                            columns: [
+								//{
+								//	field: "TxnNo",
+								//	headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+								//	headerAttributes: { style: "text-align:center" },
+								//	attributes: { style: "text-align:center" },
+								//	template: "<input type='checkbox' value='#=TxnNo#' class='checkboxGroups'/>",
+								//	width: 50
+								//},
+								{
+                                    field: "Username",
+                                    title: "@T("Admin.TransactionList.Deposit.Fields.Username")",
+                                    width: 200
+                                },
+                                {
+                                    field: "Date",
+                                    title: "@T("Admin.TransactionList.Deposit.Fields.Date")",
+                                    width: 200,
+                                    type: "date",
+                                    format: "{0:@dateFormat}"
+                                },
+                                {
+                                    field: "TxnNo",
+                                    title: "@T("Admin.TransactionList.Deposit.Fields.TransactionNo")",
+                                    width: 200
+                                },
+                                {
+                                    field: "DepositAmt",
+                                    title: "@T("Admin.TransactionList.Deposit.Fields.DepositAmount")",
+                                    width: 200
+                                },
+                                @*wailiang 20190115 MDT-194 \/*@
+                                {
+                                    field: "Status",
+                                    title: "@T("Admin.TransactionList.Deposit.Fields.Status")",
+                                    width: 200
+                                },
+                                @* wailiang 20190115 MDT - 194 /\*@
+                            ]
+                            });
+                        }
+                        $('#search-txn').click(function () {
+
+                            var dtFrom = $('#@Html.IdFor(model => model.DateFrom)').val();
+                            var dtTo = $('#@Html.IdFor(model => model.DateTo)').val();
+
+                            if (dtFrom == '' || dtTo == '') {
+                                alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                return;
+                            }
+
+                                var dtFrom1 = new Date(dtFrom);
+                                var dtTo1 = new Date(dtTo);
+
+                                if (dtTo1 < dtFrom1)
+                                {
+                                    alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                    return;
+                                }
+                            deposit();
+                            var grid = $('#txn-grid').data('kendoGrid');
+                            grid.dataSource.page(1); //new search. Set page size to 1
+                            //grid.dataSource.read(); we already loaded the grid above using "page" function
+                            return false;
+                        });
+
+                        function additionalData() {
+                            var data = {
+                                Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                DateFrom: $('#@Html.IdFor(model => model.DateFrom)').val(),
+                                DateTo: $('#@Html.IdFor(model => model.DateTo)').val(),
+                                TxnNo: $('#@Html.IdFor(model => model.TxnNo)').val(),
+                                DepositAmt: $('#@Html.IdFor(model => model.DepositAmt)').val(),
+                                @* wailiang 20190115 MDT - 194 \/*@
+                                StatusValue: $('#@Html.IdFor(model => model.StatusValue)').val(),
+                                @* wailiang 20190115 MDT - 194 /\*@
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                        }
+
+                        $("input[name='TxnNo']").TouchSpin({
+                            min: 0,
+                            max: 2147483647,
+                            decimals: 0,
+                            verticalbuttons: true,
+                            prefix: "",
+                            forcestepdivisibility: ""
+                        });
+
+                        $("input[name='DepositAmt']").TouchSpin({
+                            min: 0,
+                            max: 79228162514264337593543950335,
+                            decimals: 3, //always display 4 digits
+                            forcestepdivisibility: "none",
+                            verticalbuttons: true,
+                            //prefix: "mBTC"
+						});
+
+						//search button
+						$("".concat(
+							"#@Html.IdFor(model => model.Username),",
+                            "#@Html.IdFor(model => model.DateFrom),",
+                            "#@Html.IdFor(model => model.DateTo),",
+                            "#@Html.IdFor(model => model.TxnNo),",
+                            "#@Html.IdFor(model => model.DepositAmt),",
+                            "#@Html.IdFor(model => model.StatusValue)"
+							)
+						).keydown(function (event)
+						{
+                            if (event.keyCode === 13) {
+                                $("#search-txn").click();
+                                return false;
+                            }
+                        });
+
+                    });
+                    //wailiang 20181002 MSP-190 /\
+					</script>
+                    @*<script type="text/javascript">
+                            $(document).ready(function () {
+
+
+
+                                //$("#DateFrom").kendoDatePicker({
+                                //    //value: "",
+                                //    dateInput: true,
+                                //    format: "yyyy-MM-dd"
+                                //});
+
+                                //$("#DateTo").kendoDatePicker({
+                                //    //value: "",
+                                //    dateInput: true,
+                                //    format: "yyyy-MM-dd"
+                                //});
+                            });
+
+                        </script>*@
+                    @*<div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="txn-grid"></div>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@*export selected (XML). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities
+    <form asp-controller="Transaction" asp-action="ExportXmlSelected" method="post" id="export-xml-selected-form">
+        <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+    </form>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#exportxml-selected').click(function (e) {
+                e.preventDefault();
+                var ids = selectedIds.join(",");
+                $('#export-xml-selected-form #selectedIds').val(ids);
+                $('#export-xml-selected-form').submit();
+                return false;
+            });
+        });
+    </script>
+
+    @*export selected (Excel). We don't use GET approach because it's limited to 2K-4K chars and won't work for large number of entities
+    <form asp-controller="Transaction" asp-action="ExportExcelSelected" method="post" id="export-excel-selected-form">
+        <input type="hidden" id="selectedIds" name="selectedIds" value="" />
+    </form>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#exportexcel-selected').click(function (e) {
+                e.preventDefault();
+                var ids = selectedIds.join(",");
+                $('#export-excel-selected-form #selectedIds').val(ids);
+                $('#export-excel-selected-form').submit();
+                return false;
+            });
+        });
+    </script>*@

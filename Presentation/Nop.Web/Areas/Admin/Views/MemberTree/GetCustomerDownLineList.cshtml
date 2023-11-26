@@ -1,0 +1,1205 @@
+﻿@inject AdminAreaSettings adminAreaSettings
+@model Nop.Web.Areas.Admin.Models.MemberTree.MemberTreeModel
+@using Nop.Services.Helpers;
+@{
+    //page title
+    ViewBag.Title = T("Admin.MemberTree.Details.Chart.Title").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("CustomerDownLine");
+
+    var prefix = "mBTC"; //Prefix set for Contribution
+
+    //var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss");
+    string TodayDate = DateTime.Now.ToString("yyyy-MM-dd_HHmm");
+}
+<style>
+
+    .textClass {
+        width: 50% !important;
+    }
+
+    .textDetailsClass {
+        width: 40% !important;
+    }
+
+    /* Modal Card CSS */
+    .card {
+        border: 2px solid rgba(0,0,0,.125);
+        border-radius: .25rem;
+        margin-top: 1%;
+        margin-bottom: 2%;
+        padding-left: 1%;
+        padding-right: 1%;
+        padding-top: 2%;
+        padding-bottom: 1%
+    }
+
+    /*html, body {
+        margin: 0px;
+        padding: 0px;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        text-align: center;
+        font-family: Helvetica;
+    }*/
+
+    /*#tree {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }*/
+
+    .jstree {
+        overflow: scroll;
+        cursor: grab;
+        /*cursor: -o-grab;*/
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+        min-width: 100%;
+    }
+</style>
+
+<nop-antiforgery-token />
+<form asp-controller="MemberTree" asp-action="GetCustomerDownLineList" method="get">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.MemberTree.Title")
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="MemberTreeList">@T("Admin.MemberTree.Details.BackToList")</a>   @*RW 20181227 MSP-610*@
+            </small>
+        </h1>
+        @*<div class="pull-right">
+                <a asp-action="Create" class="btn bg-blue">
+                    <i class="fa fa-plus-square"></i>
+                    @T("Admin.Common.AddNew")
+                </a>
+                @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_discount_list_buttons" })
+            </div>*@
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-7 col-md-offset-4">
+                                    <input type="text" class="form-control" id="txtSearch" placeholder="Type to search..." value="" align="right">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="btnSearch" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- </form> -->
+                    </div>
+                </div>
+                @*<div class="panel-body">*@
+
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">@T("Admin.MemberTree.Details.Title")</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4 col-form-label">@T("Admin.MemberTree.Details.Username")</label>
+                                    <input type="text" class="form-control textClass" id="txtUsername" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.GlobalGuid")</label>
+                                    <input type="text" class="textClass form-control" id="txtGlobalGuid" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.SelfScore")</label>
+                                    <input type="text" class="form-control textClass" id="txtSelfScore" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.SelfScorePercentage")</label>
+                                    <input type="text" class="form-control textClass" id="txtSelfScorePct" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.TeamScore")</label>
+                                    <input type="text" class="form-control textClass" id="txtTeamScore" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.TeamScorePercentage")</label>
+                                    <input type="text" class="form-control textClass" id="txtTeamScorePct" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.MemberQty")</label>
+                                    <input type="text" class="form-control textClass" id="txtMemberQty" readonly="readonly">
+                                </div>
+                                <div class="form-group form-inline">
+                                    <label class="col-md-4">@T("Admin.MemberTree.Details.Contribution")</label>
+                                    <input type="text" class="form-control textClass" id="txtContribution" readonly="readonly">
+                                </div>
+
+                                <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                    <i class="fa fa-angle-double-down"></i>
+                                    @T("Admin.MemberTree.Details.ContributionDetails")
+                                </a>
+                                <div class="collapse" id="collapseExample">
+                                    <div class="card card-body">
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AvailableBalance")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAvailBal" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.LockedEarningWalletBalance")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtLockEarning" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AgencyFeeAmount")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAgencyFeeAmt" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AgencyFeeReturned")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAgencyFeeReturn" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AgencyFeeReward")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAgencyFeeReward" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AgencyFeeRewardTask")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAgencyFeeRewardTask" readonly="readonly">@*// Tony Liew 20190103 MSP-625*@
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.AgentReward")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtAgentReward" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.TaskReward")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtTaskReward" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group form-inline">
+                                            <label class="col-md-5">@T("Admin.MemberTree.Details.MerchantReferralReward")</label>
+                                            <input type="text" class="form-control textDetailsClass" id="txtMerchantReferral" readonly="readonly">
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @*</div>*@
+                @*</div>*@
+
+                @*Google Api Chart*@
+                <div class="panel panel-default" hidden="hidden">
+                    <div class="panel-body">
+                        <div id="chart_div" class="chart">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default" hidden="hidden">
+                    <div class="panel-body">
+                        <div id="chart_test">
+                        </div>
+                    </div>
+                </div>
+                @*Google Api Chart*@
+
+
+                @*Balkan Graph Chart*@
+                @*<div class="panel panel-default">
+                        <div class="panel-body">
+                            <div id="tree" class="chart"></div>
+                        </div>
+                    </div>*@
+                @*Balkan Graph Chart*@
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="container-fluid">
+                            @*<div id="tree1"></div>*@
+                            @*<div id="treeview-searchable" class="treeview"></div>*@
+                            <div id="jstree_demo_div" class="dragscroll"></div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            jstree();
+            //jonmiles();
+            //test123();
+            //gjgoChart();
+            //generateChart();
+
+
+        });
+    </script>
+    @*<link href="~/js/jqueryfloating.css" rel="stylesheet" />
+        <script src="~/js/jquery.ba-floatingscrollbar.js"></script>
+        <script src="~/js/jquery.ba-floatingscrollbar.min.js"></script>*@
+    @*<link href="~/js/FloatingScroll/style.css" rel="stylesheet" />
+        <script src="~/js/FloatingScroll/jquery.floatingscroll.js"></script>
+        <script src="~/js/FloatingScroll/script.js"></script>*@
+    @*<script src="~/js/FloatingScroll/jquery-1.12.0.min.js"></script>*@
+
+    @*<script type="text/javascript" src="https://cdn.rawgit.com/asvd/dragscroll/master/dragscroll.js"></script>*@
+    <script src="~/js/dragscroll.js"></script>
+
+    @*<link href="~/js/jstree/themes/default-dark/" rel="stylesheet" />*@
+
+    @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />*@
+    <link href="~/js/jstree/dist/themes/default/style.min.css" rel="stylesheet" />
+    @*<link href="~/js/jstree/themes/default-dark/style.min.css" rel="stylesheet" />*@
+    <script src="~/js/jstree/jstree.min.js"></script>
+    <script>
+        function jstree() {
+
+            //$("#jstree_demo_div").floatingScroll();
+
+            var data = [];
+            var list = JSON.parse('@Html.Raw(Json.Serialize(Model.CustomerMemberTreeList))');
+
+            //console.log(list);
+
+                for (var val of list) {
+
+                        //console.log(val.Username);
+                        //console.log(val.ParentId);
+
+                        data.push({
+                            "id": val.CustomerId,
+                            "parent": val.ParentId != null ? val.ParentId : '#',
+                            "text": val.Username != null ? val.Username : val.CustomerId,
+                            "icon": val.ParentId != null ?"fa fa-user" : "fa fa-tree"
+                            //test:"test123"
+                        });
+            }
+
+               //for (var v in data) {
+               // console.log("cusId: " + data[v].id + ", ParentId: " + data[v].parent + ", name: " + data[v].text);
+               // //console.log("key " + v.id + " has value " + data[v.id]);
+               // }
+
+            $('#jstree_demo_div').jstree({
+                "core": {
+                    "animation": 0,
+                    "check_callback": true,
+                    "themes": { "stripes": true },
+                    //'data': [
+                    //    { "id": "ajson1", "parent": "#", "text": "Simple root node" },
+                    //    { "id": "ajson2", "parent": "#", "text": "Root node 2" },
+                    //    { "id": "ajson3", "parent": "ajson2", "text": "Child 1" },
+                    //    { "id": "ajson4", "parent": "ajson2", "text": "Child 2" },
+                    //]
+                    'data': data
+                },
+                "types": {
+                    "#": {
+                        "max_children": -1,
+                        "max_depth": -1,
+                        //"valid_children": ["root"],
+                    },
+                    "root": {
+                        "icon": "/static/3.3.7/assets/images/tree_icon.png",
+                        "valid_children": ["default"]
+                    },
+                    "default": {
+                        "valid_children": ["default", "file"]
+                    },
+                    "file": {
+                        "icon": "glyphicon glyphicon-file",
+                        "valid_children": []
+                    }
+                },
+                "plugins": [
+                    "search",
+                    //"state",
+                    "types",
+                ]
+            });
+
+            //var to = false;
+            //$('#txtSearch').keyup(function () {
+            //    if (to) { clearTimeout(to); }
+            //    to = setTimeout(function () {
+            //        var v = $('#txtSearch').val();
+            //        $('#jstree_demo_div').jstree(true).search(v);
+            //    }, 250);
+            //});
+
+            var to = false;
+            $('#btnSearch').click(function () {
+                if (to) { clearTimeout(to); }
+                to = setTimeout(function () {
+                var v = $('#txtSearch').val();
+                $('#jstree_demo_div').jstree(true).search(v);
+            }, 250);
+            });
+
+            $('#jstree_demo_div')
+                // listen for event
+                .on('changed.jstree', function (e, data) {
+
+                    var i, j, r = [];
+                    for (i = 0, j = data.selected.length; i < j; i++) {
+                        r.push(data.instance.get_node(data.selected[i]).text);
+                    }
+                    //console.log(data.instance.get_node(data.selected).id);
+                    //console.log(r.join(', '));
+
+                    var nodeId = data.instance.get_node(data.selected).id;
+                    console.log(nodeId);
+                    CustomerDetails(nodeId);
+
+                    //$('#event_result').html('Selected: ' + r.join(', '));
+                })
+                // create the instance
+                .jstree();
+
+            function CustomerDetails(nodeId)
+            {
+                    //var nodeData = chart.get(nodeId); //RW 20190102 MSP-609
+                    //var customerid = nodeData["id"];  //RW 20190102 MSP-609
+                    var customerid = nodeId;  //RW 20190102 MSP-609
+                    //console.log(customerid);
+                    $.fn.modal.Constructor.prototype._enforceFocus = function () { };
+
+                    var mymodal = $('#myModal');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetCustomerDetail", "MemberTree")',
+                        dataType: 'JSON',
+                        data: { "Id" : customerid },
+                        success: function (response) {
+                            //console.log(response);
+                            $('#txtUsername').val(response.Username);
+                            $('#txtGlobalGuid').val(response.UserGuid);
+                            $('#txtSelfScore').val(response.Score_Y);
+                            $('#txtSelfScorePct').val(response.ScorePct_Y);
+                            $('#txtTeamScore').val(response.Score_Z);
+                            $('#txtTeamScorePct').val(response.ScorePct_Z);
+                            $('#txtMemberQty').val(response.MemberQuantity);
+                            $('#txtContribution').val(response.Contribution+' @prefix');
+
+                            $('#txtAvailBal').val(response.AvailableBalance+' @prefix');
+                            $('#txtLockEarning').val(response.LockedEarningWalletBalance+' @prefix');
+                            $('#txtAgencyFeeAmt').val(response.AgencyFeeAmount+' @prefix');
+                            $('#txtAgencyFeeReturn').val(response.AgencyFeeReturned+' @prefix');
+                            $('#txtAgencyFeeReward').val(response.AgencyFeeReward + ' @prefix');
+                            $('#txtAgencyFeeRewardTask').val(response.AgencyFeeRewardTask+' @prefix'); // Tony Liew 20190103 MSP-625
+                            $('#txtAgentReward').val(response.AgentReward+' @prefix');
+                            $('#txtTaskReward').val(response.TaskReward+' @prefix');
+                            $('#txtMerchantReferral').val(response.MerchantReferralReward+' @prefix');
+                            //alert("success");
+                        },
+                        error: function () {
+                            alert('fail');
+                        }
+                    });
+
+                    //var t = $('#txtGlobalGuid').val();
+                    //$('#txtGlobalGuid').val('1245646'); //override value from Modal
+
+                    mymodal.modal('show');
+            };
+
+            @* Collapse Modal Card when close modal *@
+            $('#myModal').on('hidden.bs.modal', function () {
+                $('.collapse').collapse('hide');
+            })
+            @* Collapse Modal Card when close modal *@
+        }
+    </script>
+
+    @*<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">*@
+    <script src="https://rawgit.com/jonmiles/bootstrap-treeview/master/public/js/bootstrap-treeview.js"></script>
+    <link rel="stylesheet" href=https://rawgit.com/jonmiles/bootstrap-treeview/master/public/css/bootstrap-treeview.css type="text/css" />
+
+    <script type="text/javascript">
+
+        function jonmiles() {
+            var tree = [
+                {
+                    text: "Parent 1",
+                    nodes: [
+                        {
+                            text: "Child 1",
+                            nodes: [
+                                {
+                                    text: "Grandchild 1"
+                                },
+                                {
+                                    text: "Grandchild 2"
+                                }
+                            ]
+                        },
+                        {
+                            text: "Child 2"
+                        }
+                    ]
+                },
+                {
+                    text: "Parent 2"
+                },
+                {
+                    text: "Parent 3"
+                },
+                {
+                    text: "Parent 4"
+                },
+                {
+                    text: "Parent 5"
+                }
+            ];
+            console.log(tree);
+
+            var t = JSON.stringify(tree, null, " ")
+            //t = jQuery.parseJSON(tree);
+
+            var j = JSON.parse(t);
+
+            console.log('t ' + typeof (test123()));
+
+            //test123();
+
+            console.log(test123());
+
+            var JsonData = test123();
+
+            //var arr = eval('(' + JsonData + ')');
+            //var arr = JSON.parse(JsonData);
+
+            //console.log(arr);
+
+            tree = test123();
+
+            function getTree() {
+                // Some logic to retrieve, or generate tree structure
+                return tree;
+            }
+
+
+            var $searchableTree = $('#treeview-searchable').treeview({
+                data: getTree(),
+            });
+
+            /*
+            var search = function(e) {
+              var pattern = $('#input-search').val();
+              var options = {
+                ignoreCase: $('#chk-ignore-case').is(':checked'),
+                exactMatch: $('#chk-exact-match').is(':checked'),
+                revealResults: $('#chk-reveal-results').is(':checked')
+              };
+              var results = $searchableTree.treeview('search', [ pattern, options ]);
+
+              var output = '<p>' + results.length + ' matches found</p>';
+              $.each(results, function (index, result) {
+                output += '<p>- ' + result.text + '</p>';
+              });
+              $('#search-output').html(output);
+            }
+
+            $('#btn-search').on('click', search);
+            $('#input-search').on('keyup', search);
+
+            $('#btn-clear-search').on('click', function (e) {
+              $searchableTree.treeview('clearSearch');
+              $('#input-search').val('');
+              $('#search-output').html('');
+            });
+            */
+
+            //$(function () {
+            var selectors = {
+                'tree': '#treeview-searchable',
+                'input': '#input-search',
+                'reset': '#btn-clear-search'
+            };
+            var lastPattern = ''; // closure variable to prevent redundant operation
+
+            // collapse and enable all before search //
+            function reset(tree) {
+                tree.collapseAll();
+                tree.enableAll();
+            }
+
+            // find all nodes that are not related to search and should be disabled:
+            // This excludes found nodes, their children and their parents.
+            // Call this after collapsing all nodes and letting search() reveal.
+            //
+            function collectUnrelated(nodes) {
+                var unrelated = [];
+                $.each(nodes, function (i, n) {
+                    if (!n.searchResult && !n.state.expanded) { // no hit, no parent
+                        unrelated.push(n.nodeId);
+                    }
+                    if (!n.searchResult && n.nodes) { // recurse for non-result children
+                        $.merge(unrelated, collectUnrelated(n.nodes));
+                    }
+                });
+                return unrelated;
+            }
+
+            // search callback
+            var search = function (e) {
+                var pattern = $(selectors.input).val();
+                if (pattern === lastPattern) {
+                    return;
+                }
+                lastPattern = pattern;
+                var tree = $(selectors.tree).treeview(true);
+                reset(tree);
+                if (pattern.length < 3) { // avoid heavy operation
+                    tree.clearSearch();
+                } else {
+                    tree.search(pattern);
+                    // get all root nodes: node 0 who is assumed to be
+                    //   a root node, and all siblings of node 0.
+                    var roots = tree.getSiblings(0);
+                    roots.push(tree.getNode(0));
+                    //first collect all nodes to disable, then call disable once.
+                    //  Calling disable on each of them directly is extremely slow!
+                    var unrelated = collectUnrelated(roots);
+                    tree.disableNode(unrelated, { silent: true });
+                }
+            };
+
+            // typing in search field
+            $(selectors.input).on('keyup', search);
+
+            // clear button
+            $(selectors.reset).on('click', function (e) {
+                $(selectors.input).val('');
+                var tree = $(selectors.tree).treeview(true);
+                reset(tree);
+                tree.clearSearch();
+            });
+        }
+
+
+        function test123()
+        {
+            var data = [];
+            var list = JSON.parse('@Html.Raw(Json.Serialize(Model.CustomerMemberTreeList))');
+
+            //console.log(list);
+
+                for (var val of list) {
+
+                        //console.log(val.Username);
+                        //console.log(val.ParentId);
+
+                        data.push({
+                            'id': val.CustomerId,
+                            'parentid': val.ParentId != null ? val.ParentId : 0,
+                            'Username': val.Username != null ? val.Username : val.CustomerId,
+                            //test:"test123"
+                        });
+            }
+            //console.log(data);
+             //for (var v in arr) {
+             //       console.log("cusId: " + arr[v].id + ", ParentId: " + arr[v].pid + ", name: " + arr[v].name);
+             //       //console.log("key " + v.id + " has value " + data[v.id]);
+             //   }
+
+            //function list_to_tree(list) {
+            //    var map = {}, node, roots = [], i;
+            //    for (i = 0; i < list.length; i += 1) {
+            //        map[list[i].id] = i; // initialize the map
+            //        list[i].children = []; // initialize the children
+            //    }
+            //    for (i = 0; i < list.length; i += 1) {
+            //        node = list[i];
+            //        if (node.parentId !== "0") {
+            //            // if you have dangling branches check that map[node.parentId] exists
+            //            list[map[node.parentId]].children.push(node);
+            //        } else {
+            //            roots.push(node);
+            //        }
+            //    }
+            //    return roots;
+            //}
+
+            //console.log(list_to_tree(arr));
+
+            function unflatten(data) {
+                var tree = [],
+                    mappedArr = {},
+                    arrElem,
+                    mappedElem;
+
+                // First map the nodes of the array to an object -> create a hash table.
+                for (var i = 0, len = data.length; i < len; i++) {
+                    arrElem = data[i];
+                    mappedArr[arrElem.id] = arrElem;
+                    mappedArr[arrElem.id]['children'] = [];
+                }
+
+
+                for (var id in mappedArr) {
+                    if (mappedArr.hasOwnProperty(id)) {
+                        mappedElem = mappedArr[id];
+                        // If the element is not at the root level, add it to its parent array of children.
+                        if (mappedElem.parentid) {
+                            mappedArr[mappedElem['parentid']]['children'].push(mappedElem);
+                        }
+                        // If the element is at the root level, add it to first level elements array.
+                        else {
+                            tree.push(mappedElem);
+                        }
+                    }
+                }
+                return tree;
+            }
+
+            var tree = unflatten(data);
+            return tree;
+            //console.log(tree);
+            //console.log(JSON.stringify(tree, null, " ")); //boleh pakai
+            //return JSON.stringify(tree, null, " ");
+            //document.body.innerHTML = "<pre>" + (JSON.stringify(tree, null, " "))
+        }
+    </script>
+
+    @*<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>*@
+    @*<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">*@
+
+    @*  <script src="https://unpkg.com/gijgo@1.9.11/js/gijgo.min.js" type="text/javascript"></script>
+        <link href="https://unpkg.com/gijgo@1.9.11/css/gijgo.min.css" rel="stylesheet" type="text/css" />*@
+
+    <link href="~/js/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <script src="~/js/gijgo.min.js"></script>
+
+    <script type="text/javascript">
+            function gjgoChart() {
+
+                 var list = JSON.parse('@Html.Raw(Json.Serialize(Model.DownlineMemberTreeList))');
+
+                $('#tree1').tree({
+                    uiLibrary: 'bootstrap',
+                    primaryKey: 'id',
+                    dataSource: list,
+                    lazyLoading: true,
+                    select: function (e, node, id) {
+                        //alert('select is fired for node with id=' + id);
+                        CustomerDetails(id);
+                    }
+                });
+
+            function CustomerDetails(nodeId)
+            {
+                    //var nodeData = chart.get(nodeId); //RW 20190102 MSP-609
+                    //var customerid = nodeData["id"];  //RW 20190102 MSP-609
+                    var customerid = nodeId;  //RW 20190102 MSP-609
+
+                    $.fn.modal.Constructor.prototype._enforceFocus = function () { };
+
+                    var mymodal = $('#myModal');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetCustomerDetail", "MemberTree")',
+                        dataType: 'JSON',
+                        data: { "Id" : customerid },
+                        success: function (response) {
+                            //console.log(response);
+                            $('#txtUsername').val(response.Username);
+                            $('#txtGlobalGuid').val(response.UserGuid);
+                            $('#txtSelfScore').val(response.Score_Y);
+                            $('#txtSelfScorePct').val(response.ScorePct_Y);
+                            $('#txtTeamScore').val(response.Score_Z);
+                            $('#txtTeamScorePct').val(response.ScorePct_Z);
+                            $('#txtMemberQty').val(response.MemberQuantity);
+                            $('#txtContribution').val(response.Contribution+' @prefix');
+
+                            $('#txtAvailBal').val(response.AvailableBalance+' @prefix');
+                            $('#txtLockEarning').val(response.LockedEarningWalletBalance+' @prefix');
+                            $('#txtAgencyFeeAmt').val(response.AgencyFeeAmount+' @prefix');
+                            $('#txtAgencyFeeReturn').val(response.AgencyFeeReturned+' @prefix');
+                            $('#txtAgencyFeeReward').val(response.AgencyFeeReward + ' @prefix');
+                            $('#txtAgencyFeeRewardTask').val(response.AgencyFeeRewardTask+' @prefix'); // Tony Liew 20190103 MSP-625
+                            $('#txtAgentReward').val(response.AgentReward+' @prefix');
+                            $('#txtTaskReward').val(response.TaskReward+' @prefix');
+                            $('#txtMerchantReferral').val(response.MerchantReferralReward+' @prefix');
+                            //alert("success");
+                        },
+                        error: function () {
+                            alert('fail');
+                        }
+                    });
+
+                    //var t = $('#txtGlobalGuid').val();
+                    //$('#txtGlobalGuid').val('1245646'); //override value from Modal
+
+                    mymodal.modal('show');
+            };
+
+            @* Collapse Modal Card when close modal *@
+            $('#myModal').on('hidden.bs.modal', function () {
+                $('.collapse').collapse('hide');
+            })
+            @* Collapse Modal Card when close modal *@
+
+            }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css?family=Gochi+Hand" rel="stylesheet">
+
+    @*<script src="https://balkangraph.com/js/latest/OrgChart.js"></script>*@
+    <script src="~/js/BalkanOrgChart/BalkanOrgChart3.7.3.js"></script>
+    @*<script src="~/js/BalkanOrgChart/BalkanOrgChart3.7.2.js"></script>*@
+
+    @*If there's any question, please refer to MSP\Document\BalkanOrgChart Documentation*@
+    @*Generate Balkan Graph Chart*@
+    <script type="text/javascript">
+
+        function generateChart() {
+
+            var list = JSON.parse('@Html.Raw(Json.Serialize(Model.CustomerMemberTreeList))');
+
+            function pdf(nodeId) {
+                chart.exportPDF("MyFileName.pdf", true, nodeId);
+            }
+            function png(nodeId) {
+                chart.exportPNG("MyFileName.png", true, nodeId);
+                //chart.exportSVG("GRCMemberTree_"+'@TodayDate'+".png", true, nodeId);
+            }
+            function svg(nodeId) {
+                chart.exportSVG("GRCMemberTree_"+'@TodayDate'+".svg", true, nodeId);
+                //chart.exportSVG("GRCMemberTree.svg", true, nodeId);
+            }
+            function csv(nodeId) {
+                chart.exportCSV("GRCMemberTree_"+'@TodayDate'+".csv", true, nodeId);
+                //chart.exportSVG("GRCMemberTree.svg", true, nodeId);
+            }
+
+            OrgChart.templates.polina.field_0 = '<text width="210" class="field_0" style="font-size: 18px;" fill="#ffffff" x="150" y="40"  text-anchor="middle">{val}</text>';
+            OrgChart.templates.polina.rippleColor = "#ec13ee"; //RW 20181227 MSP-611
+            OrgChart.templates.polina.exportMenuButton = '<div style="position:absolute;right:12%;top:{p}px; width:40px;height:50px;cursor:pointer;" control-export-menu=""><button type="button" class="btn btn-success" id="btnExport"></button ></div>' //RW 20180102 MSP-619
+
+            var chart = new OrgChart(document.getElementById("tree"), {
+                layout: BALKANGraph.mixed,
+                lazyLoading: true,
+                showXScroll: BALKANGraph.scroll.visible,
+                showYScroll: BALKANGraph.scroll.visible,
+                scaleInitial: 0.7,                          //RW 20181227 MSP-613
+                //scaleInitial: BALKANGraph.match.height,
+                scaleMin: 0.2,                              //RW 20181227 MSP-613
+                scaleMax: 3,                                //RW 20181227 MSP-613
+                mouseScroolBehaviour: BALKANGraph.action.zoom,
+                nodeMouseClickBehaviour: BALKANGraph.action.cusdetails,  //RW 20190102 MSP-609
+                template: "polina",
+                enableDragDrop: false,
+                //tags: {
+                //    "hide": {
+                //        state: BALKANGraph.COLLAPSE
+                //    },
+                //    "expand":
+                //    {
+                //        state: BALKANGraph.EXPAND
+                //    }
+                //},
+                menu: {
+                    //pdf: { text: "Export PDF" },
+                    //png: { text: "Export PNG" },
+                    //svg: { text: "Export SVG" },
+                    //png: {
+                    //    text: "Export PNG",
+                    //    icon: BALKANGraph.icon.png(24, 24, "#7A7A7A"),
+                    //    onClick: png
+                    //},   //RW 20190103 MSP-611
+                    //csv: {
+                    //    text: "Export CSV",
+                    //    icon: BALKANGraph.icon.csv(24, 24, "#7A7A7A"),
+                    //    onClick: csv
+                    //},   //RW 20190103 MSP-611
+                    export_svg: {
+                        text: "Export SVG",
+                        icon: BALKANGraph.icon.svg(24, 24, "#7A7A7A"),
+                        onClick: svg
+                    } //RW 20190103 MSP-611
+                },
+                nodeMenu: {
+                    //pdf: { text: "Export PDF" },
+                    //png: { text: "Export PNG" },
+                    //svg: { text: "Export SVG" }
+                    //pdf: {
+                    //    text: "Export PDF",
+                    //    icon: BALKANGraph.icon.pdf(24, 24, "#7A7A7A"),
+                    //    onClick: pdf
+                    //},   //RW 20190103 MSP-611
+                    //png: {
+                    //    text: "Export PNG",
+                    //    icon: BALKANGraph.icon.png(24, 24, "#7A7A7A"),
+                    //    onClick: png
+                    //},   //RW 20190103 MSP-611
+                    //csv: {
+                    //    text: "Export CSV",
+                    //    icon: BALKANGraph.icon.csv(24, 24, "#7A7A7A"),
+                    //    onClick: csv
+                    //}, //RW 20190103 MSP-611
+                    export_svg: {
+                        text: "Export SVG",
+                        icon: BALKANGraph.icon.svg(24, 24, "#7A7A7A"),
+                        onClick: svg
+                    } //RW 20190103 MSP-611
+                },
+                nodeBinding: {
+                    field_0: "Username",
+                    //html: "html"
+                    //field_1: "title",
+                    //img_0: "img",
+                    //field_number_children: "field_number_children"
+                },
+                //nodes: [
+                //    //{ id: 1, name: "Billy Moore", title: "CEO", img: "https://balkangraph.com/js/img/2.jpg" },
+                //    { id: 1, name: "Billy Moore", title: "", img: "" },
+                //    { id: 2, pid: 1, name: "Billie Rose" , title: "", img: "" },
+
+                //    { id: 3, pid: 1, name: "Glenn Bell" , title: "", img: "" },
+                //    { id: 4, pid: 3, name: "Blair Francis" , title: "", img: "" },
+                //]
+            });
+            for (val of list) {
+                chart.add({
+                    id: val.CustomerId
+                    , Username: val.Username
+                    , pid: val.ParentId
+                    //, title: ""
+                    //, img: ""
+                    //, tags: (val.ParentId != null) ? ["hide"] :["expand"]
+                    //, html: "<div><button>val.CustomerId</button></div>" //future enhancement
+                })
+            }
+            chart.draw(BALKANGraph.action.init); //generate chart
+
+            document.getElementById("btnExport").innerHTML = '<i class= "fa fa-download"></i>@T("Admin.Common.Export")'; //RW 20180102 MSP-619
+
+            //RW 20190102 MSP-609
+            @* Trigger the modal when click *@
+            $("#tree").bind('click', function (e)
+            {
+                e.stopPropagation();
+                e.preventDefault();
+                var nodeId = customNodeId;
+                //console.log('t: ' + nodeId);
+
+                @*Prevent Modal Triggered if clicked*@
+                if (nodeId != null) {
+                    CustomerDetails(nodeId);
+                    //console.log('t: ' + nodeId);
+                    nodeId = null;
+                    //console.log('n: ' + nodeId);
+                }
+                @* Prevent Modal Triggered if clicked *@
+            });
+
+            @* Prevent Modal Triggered if clicked *@
+            $("#btnExport").click(function () {
+                customNodeId = null;
+            });
+
+            $("#searchUI").click(function () {
+                customNodeId = null;
+            });
+            @* Prevent Modal Triggered if clicked *@
+
+            //RW 20190102 MSP-609
+
+            function CustomerDetails(nodeId)
+            {
+                    //var nodeData = chart.get(nodeId); //RW 20190102 MSP-609
+                    //var customerid = nodeData["id"];  //RW 20190102 MSP-609
+                    var customerid = nodeId;  //RW 20190102 MSP-609
+
+                    $.fn.modal.Constructor.prototype._enforceFocus = function () { };
+
+                    var mymodal = $('#myModal');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetCustomerDetail", "MemberTree")',
+                        dataType: 'JSON',
+                        data: { "Id" : customerid },
+                        success: function (response) {
+                            //console.log(response);
+                            $('#txtUsername').val(response.Username);
+                            $('#txtGlobalGuid').val(response.UserGuid);
+                            $('#txtSelfScore').val(response.Score_Y);
+                            $('#txtSelfScorePct').val(response.ScorePct_Y);
+                            $('#txtTeamScore').val(response.Score_Z);
+                            $('#txtTeamScorePct').val(response.ScorePct_Z);
+                            $('#txtMemberQty').val(response.MemberQuantity);
+                            $('#txtContribution').val(response.Contribution+' @prefix');
+
+                            $('#txtAvailBal').val(response.AvailableBalance+' @prefix');
+                            $('#txtLockEarning').val(response.LockedEarningWalletBalance+' @prefix');
+                            $('#txtAgencyFeeAmt').val(response.AgencyFeeAmount+' @prefix');
+                            $('#txtAgencyFeeReturn').val(response.AgencyFeeReturned+' @prefix');
+                            $('#txtAgencyFeeReward').val(response.AgencyFeeReward + ' @prefix');
+                            $('#txtAgencyFeeRewardTask').val(response.AgencyFeeRewardTask+' @prefix'); // Tony Liew 20190103 MSP-625
+                            $('#txtAgentReward').val(response.AgentReward+' @prefix');
+                            $('#txtTaskReward').val(response.TaskReward+' @prefix');
+                            $('#txtMerchantReferral').val(response.MerchantReferralReward+' @prefix');
+                            //alert("success");
+                        },
+                        error: function () {
+                            alert('fail');
+                        }
+                    });
+
+                    //var t = $('#txtGlobalGuid').val();
+                    //$('#txtGlobalGuid').val('1245646'); //override value from Modal
+
+                    mymodal.modal('show');
+            };
+
+            @* Collapse Modal Card when close modal *@
+            $('#myModal').on('hidden.bs.modal', function () {
+                $('.collapse').collapse('hide');
+            })
+            @* Collapse Modal Card when close modal *@
+        }
+    </script>
+    @*Generate Balkan Graph Chart*@
+
+    @* Generate Old Balkan Graph Chart *@
+    <script type="text/javascript">
+            function generateChartOld() {
+
+                var list = JSON.parse('@Html.Raw(Json.Serialize(Model.CustomerMemberTreeList))');
+
+                OrgChart.templates.polina.html = '<foreignobject class="node" x="20" y="10" width="200" height="100">{val}</foreignobject>'; //ways to include HTML elements in the node(future enhancement)
+
+                var chart = new OrgChart(document.getElementById("tree"), {
+                    lazyLoading: true,
+                    showXScroll: BALKANGraph.scroll.visible,
+                    showYScroll: BALKANGraph.scroll.visible,
+                    scaleInitial: 0.7,                          //RW 20181227 MSP-613
+                    //scaleInitial: BALKANGraph.match.height,
+                    scaleMin: 0.2,                              //RW 20181227 MSP-613
+                    scaleMax: 3,                                //RW 20181227 MSP-613
+                    mouseScroolBehaviour: BALKANGraph.action.zoom,
+                    nodeMouseClickBehaviour: BALKANGraph.action.cusdetails,  //RW 20190102 MSP-609
+                    //nodeMouseClickBehaviour: BALKANGraph.action.expandCollapse,
+                    template: "polina",
+                    enableDragDrop: false,
+                    tags: {
+                        "hide": {
+                            state: BALKANGraph.COLLAPSE
+                        },
+                        "expand" :
+                        {
+                            state: BALKANGraph.EXPAND
+                        }
+                    },
+                    menu: {
+                        pdf: { text: "Export PDF" },
+                        png: { text: "Export PNG" },
+                        svg: { text: "Export SVG" },
+                        csv: { text: "Export CSV" }
+                    },
+                   //nodeMenu: {
+                   //     //details: { text: "Details", onClick: CustomerDetails },
+                   //     //add: { text: "Add New" },
+                   //     //edit: { text: "Edit" },
+                   //     //remove: { text: "Remove" },
+                   // },
+                    nodeBinding: {
+                        field_0: "Username",
+                        html: "html"
+                        //field_1: "title",
+                        //img_0: "img",
+                        //field_number_children: "field_number_children"
+                    },
+                });
+
+                for (val of list) {
+                    chart.add({
+                        id: val.CustomerId
+                        , Username: val.Username
+                        , pid: val.ParentId
+                        //, tags: (val.ParentId != null) ? ["hide"] :["expand"]
+                        //, html: "<div><button>val.CustomerId</button></div>" //future enhancement
+                    })
+                }
+
+                chart.draw(BALKANGraph.action.init); //generate chart
+
+                document.getElementById("btnExport").innerHTML = '<i class= "fa fa-download"></i>@T("Admin.Common.Export")'; //RW 20180102 MSP-619
+
+                //RW 20190102 MSP-609
+                @*Trigger the modal when click*@
+                    $("#tree").bind('click', function (e) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        var nodeId = customNodeId;
+                        //console.log('t: ' + nodeId);
+
+                        if (nodeId != null) {
+                            CustomerDetails(nodeId);
+                            //console.log('t: ' + nodeId);
+                            nodeId = null;
+                            //console.log('n: ' + nodeId);
+                        }
+
+
+                    });
+                 //RW 20190102 MSP-609
+
+                //$("#tree").click(function (event) {
+                //    alert(event.type); // "click"
+                //});
+
+                function CustomerDetails(nodeId) {
+                    //var nodeData = chart.get(nodeId); //RW 20190102 MSP-609
+                    //var customerid = nodeData["id"];  //RW 20190102 MSP-609
+                    var customerid = nodeId;  //RW 20190102 MSP-609
+
+                    $.fn.modal.Constructor.prototype._enforceFocus = function () { };
+
+                    var mymodal = $('#myModal');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '@Url.Action("GetCustomerDetail", "MemberTree")',
+                        dataType: 'JSON',
+                        data: { "Id" : customerid },
+                        success: function (response) {
+                            //console.log(response);
+                            $('#txtUsername').val(response.Username);
+                            $('#txtGlobalGuid').val(response.UserGuid);
+                            $('#txtSelfScore').val(response.Score_Y);
+                            $('#txtSelfScorePct').val(response.ScorePct_Y);
+                            $('#txtTeamScore').val(response.Score_Z);
+                            $('#txtTeamScorePct').val(response.ScorePct_Z);
+                            $('#txtMemberQty').val(response.MemberQuantity);
+                            $('#txtContribution').val(response.Contribution+' @prefix');
+
+                            $('#txtAvailBal').val(response.AvailableBalance+' @prefix');
+                            $('#txtLockEarning').val(response.LockedEarningWalletBalance+' @prefix');
+                            $('#txtAgencyFeeAmt').val(response.AgencyFeeAmount+' @prefix');
+                            $('#txtAgencyFeeReturn').val(response.AgencyFeeReturned+' @prefix');
+                            $('#txtAgencyFeeReward').val(response.AgencyFeeReward+' @prefix');
+                            $('#txtAgentReward').val(response.AgentReward+' @prefix');
+                            $('#txtTaskReward').val(response.TaskReward+' @prefix');
+                            $('#txtMerchantReferral').val(response.MerchantReferralReward+' @prefix');
+                            //alert("success");
+                        },
+                        error: function () {
+                            alert('fail');
+                        }
+                    });
+
+                    //var t = $('#txtGlobalGuid').val();
+                    //$('#txtGlobalGuid').val('1245646'); //override value from Modal
+
+                    mymodal.modal('show');
+                };
+
+                @*Collapse Modal Card when close modal*@
+                $('#myModal').on('hidden.bs.modal', function () {
+                    $('.collapse').collapse('hide');
+                })
+                @* Collapse Modal Card when close modal *@
+            }
+    </script>
+    @*Generate Old Balkan Graph Chart*@
+
+    @*Generate Google Graph Chart*@
+    @*<script  src="https://www.gstatic.com/charts/loader.js"></script>*@
+    @*<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>*@
+    <script src="~/js/loader.js"></script>
+    <script type="text/javascript">
+            //google.charts.load('current', { packages: ["orgchart"] });
+            //google.charts.setOnLoadCallback(drawChart);
+
+                function drawChartGoogleChart() {
+                    //alert("test");
+
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Name');
+                    data.addColumn('string', 'Manager');
+                    data.addColumn('string', 'ToolTip');
+
+                    var list = JSON.parse('@Html.Raw(Json.Serialize(Model.CustomerMemberTreeList))');
+
+                    var val;
+                    for (val of list) {
+
+                        console.log(val.Username);
+                        console.log(val.ParentId);
+                        data.addRows([
+                            [{ v: val.CustomerId.toString(), f: val.Username }, val.ParentId != null ? val.ParentId.toString():'', 'tool']
+
+                            //[val.CustomerId.toString(), val.ParentId.toString(), 'test']
+                        ]);
+                    }
+
+                    // Create the chart.
+                    var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+                    // Draw the chart, setting the allowHtml option to true for the tooltips.
+                    chart.draw(data, { allowHtml: true, allowCollapse: true, size: 'medium' });
+                    chart.collapse(0, true);
+            }
+
+            function testdrawChartGoogleChart() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Name');
+                data.addColumn('string', 'Manager');
+                data.addColumn('string', 'ToolTip');
+
+                //For each orgchart box, provide the name, manager, and tooltip to show.
+                data.addRows([
+                    [{ v: 'Mike', f: 'Mike<div style="color:red; font-style:italic">President</div>' },
+                        '', 'The President'],
+                    [{ v: 'Jim', f: 'Jim<div style="color:red; font-style:italic">Vice President</div>' },
+                        'Mike', 'VP'],
+                    ['Alice', 'Mike', ''],
+                    ['Bob', 'Jim', 'Bob Sponge'],
+                    ['Carol', 'Bob', '']
+                ]);
+
+                // Create the chart.
+                var chart = new google.visualization.OrgChart(document.getElementById('chart_test'));
+                // Draw the chart, setting the allowHtml option to true for the tooltips.
+                chart.draw(data, { allowHtml: true });
+            }
+    </script>
+    @*Generate Google Graph Chart*@
+
+</form>

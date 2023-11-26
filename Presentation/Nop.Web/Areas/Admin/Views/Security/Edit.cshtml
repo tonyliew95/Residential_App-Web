@@ -1,0 +1,36 @@
+﻿@model SecurityQuestionViewModel
+
+
+
+@{
+    //page title
+    ViewBag.Title = T("Admin.Configuration.SecurityQuestions").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Security Question Management System"); 
+}
+
+<form asp-controller="Security" asp-action="Edit" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.Configuration.SecurityQuestions.EditQuestion") - @Model.QuestionID
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List">@T("Admin.Configuration.SecurityQuestions.Edited.BackToList")</a>
+            </small>
+        </h1>
+        <div class="pull-right">
+            <button type="submit" name="save-continue" class="btn bg-blue" onclick="Prompt()">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+
+            <script>
+                function Prompt() {
+                    alert("Your Changes Is Save");
+                }
+            </script>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_security_details_buttons", additionalData = Model.QuestionID })
+        </div>
+    </div>
+    @await Html.PartialAsync("_CreateOrUpdate", Model)
+</form>

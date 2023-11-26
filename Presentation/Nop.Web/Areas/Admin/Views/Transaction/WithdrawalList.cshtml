@@ -1,0 +1,383 @@
+﻿@model WithdrawalListModel
+@inject AdminAreaSettings adminAreaSettings
+
+@using System.Globalization;
+@using Nop.Services.Helpers;
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss"); //wailiang 20181002 MSP-190
+
+    var blockChainPrefix = MspHelper.GetBlockchainUrlPrefix();
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.Withdrawal").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Withdrawal");
+}
+<nop-antiforgery-token />
+<form asp-controller="Transaction" asp-action="WithdrawalList" method="post">
+	<div class="content-header clearfix">
+		<h1 class="pull-left">
+			@T("Admin.TransactionList.Withdrawal")
+		</h1>
+
+		@* MDT-155		MSP requirement 1.2 > Export function to CSV > Transaction Listing → Withdrawal *@
+		<div class="pull-right">
+			<button type="submit" name="exportcsvallwithdrawal" class="btn bg-green">
+				<i class="fa fa-download"></i>
+				@T("Admin.Common.ExportToCsv")
+			</button>
+			@await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_list_withdrawal_buttons" })
+		</div>
+		@* MDT-155		MSP requirement 1.2 > Export function to CSV > Transaction Listing → Withdrawal *@
+
+	</div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Username" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Username" />
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TxnNo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input id="TxnNo" type="text" name="TxnNo" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Amount" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input id="Amount" type="text" name="Amount" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TransactionFees" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input id="TransactionFees" type="text" name="TransactionFees" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="WithdrawalAddress" />
+                                    </div>
+                                    <div class=" col-md-8">
+                                        <nop-editor asp-for="WithdrawalAddress" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="NetAmount" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input id="NetAmount" type="text" name="NetAmount" class="col-md-8 form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateFrom" />
+                                    </div>
+                                    <div class=" col-md-8">
+                                        <nop-editor asp-for="DateFrom" />
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateTo" />
+                                    </div>
+                                    <div class=" col-md-8">
+                                        <nop-editor asp-for="DateTo" />
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="BlockChainTxId" />
+                                    </div>
+                                    <div class=" col-md-8">
+                                        <nop-editor asp-for="BlockChainTxId" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="StatusValue" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-select asp-for="StatusValue" asp-items="Model.Status" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7 col-md-offset-5">
+                                    <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                        <i class="fa fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Search Panel [E] -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="txn-grid"></div>
+                    <!-- retrieve data block start -->
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                        function withdrawal() {
+                            $("#txn-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("WithdrawalList", "Transaction"))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: additionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            Id: { editable: false, type: "number" },
+                                            Username: { editable: false, type: "string" },
+                                            Date: { editable: false, type: "date" },
+                                            TxnNo: { editable: false, type: "string" },
+                                            Amount: { editable: false, type: "string" },
+                                            TransactionFees: { editable: false, type: "string" },
+                                            NetAmount: { editable: false, type: "string" },
+                                            @*//wailiang 20190116 MDT-195 \/*@
+                                            WithdrawalAddress: { editable: false, type: "string" },
+                                            BlockChainTxId: { editable: false, type: "string" },
+                                            Status: { editable: false, type: "string" },
+                                            RefundStatus: { editable: false, type: "string" },
+                                            Remark: { editable: false, type: "string"}
+                                            @*//wailiang 20190116 MDT-195 /\*@
+                                        }
+                                    }
+                                },
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: @(defaultGridPageSize),
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },
+                            scrollable: false,
+                            //dataBound: onDataBound,
+                            columns: [
+                                //{
+                                //    field: "Id",
+                                //    headerTemplate: "<input id='mastercheckbox' type='checkbox'/>",
+                                //    headerAttributes: { style: "text-align:center" },
+                                //    attributes: { style: "text-align:center" },
+                                //    template: "<input type='checkbox' value='#=Id#' class='checkboxGroups'/>",
+                                //    width: 50
+                                //},
+                                {
+                                    field: "Username",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.Username")",
+                                    width: 200
+                                },
+                                {
+                                    field: "Date",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.Date")",
+                                    format: "{0: @dateFormat}",
+                                    width: 200
+                                },
+                                {
+                                    field: "TxnNo",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.TxnId")",
+                                    width: 200
+                                },
+                                {
+                                    field: "Amount",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.Amount.mbtc")",
+                                    width: 200
+                                },
+                                {
+                                    field: "TransactionFees",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.TransactionFees.mbtc")",
+                                    width: 200
+                                },
+                                {
+                                    field: "NetAmount",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.NetAmount.mbtc")",
+                                    width: 200
+                                },
+                                @*//wailiang 20190116 MDT-195 \/*@
+                                {
+                                    field: "WithdrawalAddress",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.WithdrawalAddress")",
+                                    width: 200
+                                },
+                                {
+                                    field: "BlockChainTxId",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.BlockChainTxId")",
+                                    width: 100,
+                                    template: "# if (BlockChainTxId != null ) { # <a href = '@blockChainPrefix#=BlockChainTxId#' target ='_blank'>#=BlockChainTxId#</a> # } #",
+                                },
+                                {
+                                    field: "Status",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.Status")",
+                                    width: 200
+                                },
+                                {
+                                    field: "RefundStatus",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.RefundStatus")",
+                                    width: 200,
+                                },
+                                {
+                                    field: "Remark",
+                                    title: "@T("Admin.TransactionList.Withdrawal.Fields.Remark")",
+                                    width: 200,
+                                },
+
+                                @*//wailiang 20190116 MDT-195 /\*@
+                            ]
+                            });
+                            }
+
+                            $('#search-txn').click(function () {
+                                 //validate date cannot be empty
+                                var dtFrom = $('#@Html.IdFor(model => model.DateFrom)').val();
+                                var dtTo = $('#@Html.IdFor(model => model.DateTo)').val();
+
+                                if (dtFrom == '' || dtTo == '') {
+                                    alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                    return;
+                                }
+
+                                var dtFrom1 = new Date(dtFrom);
+                                var dtTo1 = new Date(dtTo);
+
+                                if (dtTo1 < dtFrom1)
+                                {
+                                    alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                    return;
+                                }
+
+                                withdrawal();
+                                var grid = $('#txn-grid').data('kendoGrid');
+                                grid.dataSource.page(1); //new search. Set page size to 1
+                                //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                return false;
+                            });
+
+                            $("input[name='TxnNo']").TouchSpin({
+                                min: 0,
+                                max: 2147483647,
+                                decimals: 0,
+                                verticalbuttons: true,
+                                prefix: "",
+                                forcestepdivisibility: ""
+                            });
+
+                            $("input[name='Amount']").TouchSpin({
+                                min: 0,
+                                max: 79228162514264337593543950335,
+                                decimals: 3, //always display 4 digits
+                                forcestepdivisibility: "none",
+                                verticalbuttons: true,
+                                //prefix: "mBTC"
+                            });
+
+                            $("input[name='TransactionFees']").TouchSpin({
+                                min: 0,
+                                max: 79228162514264337593543950335,
+                                decimals: 3, //always display 4 digits
+                                forcestepdivisibility: "none",
+                                verticalbuttons: true,
+                                //prefix: "mBTC"
+                            });
+
+                            $("input[name='NetAmount']").TouchSpin({
+                                min: 0,
+                                max: 79228162514264337593543950335,
+                                decimals: 3, //always display 4 digits
+                                forcestepdivisibility: "none",
+                                verticalbuttons: true,
+                                //prefix: "mBTC"
+                            });
+
+                            function additionalData() {
+
+                            var data = {
+                                Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                DateFrom: $('#@Html.IdFor(model => model.DateFrom)').val(),
+                                DateTo: $('#@Html.IdFor(model => model.DateTo)').val(),
+                                TxnNo: $('#@Html.IdFor(model => model.TxnNo)').val(),
+                                Amount: $('#@Html.IdFor(model => model.Amount)').val(),
+                                TransactionFees: $('#@Html.IdFor(model => model.TransactionFees)').val(),
+                                NetAmount: $('#@Html.IdFor(model => model.NetAmount)').val(),
+                                //wailiang 20190116 MDT-195 \/
+                                WithdrawalAddress: $('#@Html.IdFor(model => model.WithdrawalAddress)').val(),
+                                BlockchainTxId: $('#@Html.IdFor(model => model.BlockChainTxId)').val(),
+                                StatusValue: $('#@Html.IdFor(model => model.StatusValue)').val(),
+                                RefundStatus: $('#@Html.IdFor(model => model.RefundStatus)').val(),
+                                Remark: $('#@Html.IdFor(model => model.Remark)').val()
+                                //wailiang 20190116 MDT-195 /\
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+							}
+
+							//search button
+							$("".concat(
+								"#@Html.IdFor(model => model.Username),",
+								"#@Html.IdFor(model => model.DateFrom),",
+								"#@Html.IdFor(model => model.DateTo),",
+								"#@Html.IdFor(model => model.TxnNo),",
+								"#@Html.IdFor(model => model.Amount),",
+								"#@Html.IdFor(model => model.TransactionFees),",
+                                "#@Html.IdFor(model => model.NetAmount),",
+                                "#@Html.IdFor(model => model.WithdrawalAddress),",
+                                "#@Html.IdFor(model => model.BlockChainTxId),",
+                                "#@Html.IdFor(model => model.StatusValue)"
+								)
+							).keydown(function (event)
+							{
+								if (event.keyCode === 13) {
+									$("#search-txn").click();
+									return false;
+								}
+							});
+						});
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

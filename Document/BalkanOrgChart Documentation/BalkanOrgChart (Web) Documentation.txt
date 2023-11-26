@@ -1,0 +1,141 @@
+Configuring BalkanGraph version: 3.7.3
+
+Any question please refer to: (Anon, January 2019), OrgChart JS Documentation, https://balkangraph.com/OrgChartJS/Docs/GettingStarted, Accessed on: 4th January 2019.
+
+
+Add these code to your web
+
+Setup the div for the chart
+<div id="tree" class="chart"></div>
+
+CSS for the graph
+<link href="https://fonts.googleapis.com/css?family=Gochi+Hand" rel="stylesheet">
+
+BalkanOrgChart CDN script source(if needed to refer)
+<script src="https://balkangraph.com/js/latest/OrgChart.js"></script>
+
+BalkanOrgChart script source
+<script src="~/js/BalkanOrgChart/BalkanOrgChart3.7.3.js"></script>
+
+var chart = new OrgChart(document.getElementById("tree"), 
+{
+			lazyLoading: true,
+			showXScroll: BALKANGraph.scroll.visible,
+			showYScroll: BALKANGraph.scroll.visible,
+			scaleInitial: 0.7,                          
+			scaleMin: 0.2,                              
+			scaleMax: 3,                                
+			mouseScroolBehaviour: BALKANGraph.action.zoom,
+			nodeMouseClickBehaviour: BALKANGraph.action.cusdetails,
+			template: "polina",
+			enableDragDrop: false,
+			menu: 
+			{
+				export_svg: 
+				{
+					text: "Export SVG",
+					icon: BALKANGraph.icon.svg(24, 24, "#7A7A7A"),
+					onClick: svg
+				}
+			},
+			nodeMenu: 
+			{
+				export_svg: 
+				{
+					text: "Export SVG",
+					icon: BALKANGraph.icon.svg(24, 24, "#7A7A7A"),
+					onClick: svg
+				}
+			},
+			nodeBinding: {
+                    field_0: "Username",
+                    //html: "html"
+                    //field_1: "title",
+                    //img_0: "img",
+                    //field_number_children: "field_number_children"
+                },
+});
+
+			for (val of list) 
+			{
+				chart.add(
+				{
+					id: val.CustomerId
+					, Username: val.Username
+					, pid: val.ParentId
+					//, title: ""
+					//, img: ""
+					//, tags: (val.ParentId != null) ? ["hide"] :["expand"]
+					//, html: "<div><button>val.CustomerId</button></div>" //future enhancement
+				})
+			}
+            chart.draw(BALKANGraph.action.init); //generate chart
+
+Configurations for BalkanGraph Chart
+a. lazyloading:  defers loading of non-critical nodes at page load time. Instead, these non-critical nodes are loaded at the moment of need. 
+	(Used when data is too big)
+
+b. showXScroll: display the X-Axis scroll bar if the chart is too big
+c. showYScroll: display the Y-Axis scroll bar if the chart is too big
+
+d. scaleInitial: display the size of the node when load
+e. scaleMin: Minimum scale size when zoom out                          
+f. scaleMax: Maximum scale size when zoom in
+
+g. mouseScroolBehaviour: triggered when mouse scroll.
+	it can accept the following values:
+
+	BALKANGraph.action.zoom - will zoom in/out on mouse scroll
+	BALKANGraph.action.xScroll - left/right move of the chart on mouse scroll
+	BALKANGraph.action.yScroll - up/down move of the chart on mouse scroll
+	BALKANGraph.action.none - do nothing on mouse scroll
+	
+	Current selection: BALKANGraph.action.zoom
+
+h. nodeMouseClickBehaviour : trigged when node was clicked
+	it can accept the following values:
+
+	BALKANGraph.action.edit - will open the edit view for the clicked node on the right hand side
+	BALKANGraph.action.details - will open the details view for the clicked node on the right hand side, the details view is very similar to the edit view the only difference is that is read only.
+	BALKANGraph.action.expandCollapse - will expand or collapse the ckildren nodes
+	BALKANGraph.action.none - do nothing on node click event
+	
+	*BALKANGraph.action.cusdetails - will trigger the function getCustomNodeId *Customed action to get the nodeId to trigger CustomerDetails Modal*
+	
+i. template: theme for the nodes *Compulsory*
+
+	Set template if you want to change the appearance of the chart. OrgChart JS comes with number of build-in templates:
+
+		ana
+		ula
+		olivia
+		belinda
+		rony
+		mery
+		polina - Current options for template
+		mila
+		diva
+		luba
+		derek
+		base
+	
+j. enableDragDrop: to enable the drag and drop of the node(default is set to false).
+
+k. menu : customize what to show and trigger when user click on the Export Menu Button.
+
+l. nodeMenu: customize what to show and trigger when user click on the Node Menu Button from each node.
+
+m. nodeBinding: Bind the data to be shown at the node. *Compulsory*
+
+n. chart.add: a function to allow user to customize the data that needed to generate the chart *Compulsory*
+	example: chart.add({id:4,pid:2,title:"CEO",img:""})
+	or you could just loop it with forloop to populate the Arraylist for this function.
+	
+o. chart.draw: a funciton to draw the chart to display in the respective <div>   *Compulsory*
+	example: chart.draw(action);
+	action - (optional) BALKANGraph.action.expandCollapse, BALKANGraph.action.update and BALKANGraph.action.centerNode
+	default: BALKANGraph.action.init
+
+
+
+

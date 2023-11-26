@@ -1,0 +1,19 @@
+Add Side Navigation Bar Menu 
+
+1. Add new SiteMapNode in 'sitemap.config'
+
+2. In DB, add Data to PermissionRecord Table
+	=> MSP > SQLScripts > 14 Data
+
+3. Insert data into PermissionRecord_Role_Mapping by CustomerRole = 1
+	=> MSP > SQLScripts > 14 Data
+	"UNION ALL SELECT ID,@AdminRole FROM PermissionRecord WHERE SYSTEMNAME = N'ManageVideoGuides' AND CATEGORY = N'Content Management'"
+	
+4. Nop.Services > Security > "StandardPermissionProvider" add created data from DB 
+(Sample Data = "public static readonly PermissionRecord ManageSecurityQuestions = new PermissionRecord { Name = "Admin area. Manage Security Questions", SystemName = "ManageSecurityQuestions", Category = "Configuration" };")
+
+5. Add Data to GetPermissions() function
+
+6. Inject PermissionRecord to Nop.Web.Framework > Infrastructure > DependencyRegistrar.cs
+ (sample data = "builder.RegisterType<ReportService>().As<IReportService>().InstancePerLifetimeScope();" )
+

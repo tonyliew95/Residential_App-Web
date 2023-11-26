@@ -1,0 +1,278 @@
+﻿@*@model ConsumptionRewardModel //Jerry 20181102 MSP-436*@
+@model ConsumptionRewardCombineModel //Jerry 20181102 MSP-436
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+@using System.Globalization;
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    string username = ViewBag.Username;
+    string date = ViewBag.Datetime;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUIDateFormat", "yyyy-MM-dd");
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.ConsumptionRewardHistory").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Consumption Reward History");
+}
+<nop-antiforgery-token />
+<form asp-controller="Transaction" asp-action="ConsumptionRewardHistoryList" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.TransactionList.ConsumptionRewardHistory")
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                @*//Jerry 20181102 MSP-436 \/*@
+                @*<a asp-action="ConsumptionRewardSelfList">@T("Admin.TransactionList.ConsumptionRewardHistory.ConsumptionReward.BackToList")</a>*@
+                @*ActionLink(string linkText, string actionName, string controllerName, string protocol, string hostname, string fragment, object routeValues, object htmlAttributes)*@
+                @Html.ActionLink(
+                    @T("Admin.TransactionList.ConsumptionRewardHistory.ConsumptionReward.BackToList").ToHtmlString() //string linkText
+                    , "ConsumptionRewardSelfList" //string actionName
+                    , "Transaction" //string controllerName
+                    , "" //string protocol
+                    , "" //string hostname
+                    , "" //string fragment
+                    , Model.SelfListModel //object routeValues
+                    , null //object htmlAttributes
+                    )
+                @*//Jerry 20181102 MSP-436 /\*@
+            </small>
+        </h1>
+    </div>
+    <div class="content">
+        <div class="form-horizontal">
+            @*<div class="panel-group">
+                    <div class="panel panel-default panel-search">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="Username" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="Username" />
+                                        </div>
+                                    </div>
+                                    <div class=" form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TxnNo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TxnNo" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="Amount" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="Amount" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TransactionFees" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TransactionFees" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="NetAmount" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="NetAmount" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="DateFrom" />
+                                        </div>
+                                        <div class=" col-md-8">
+                                            <nop-editor asp-for="DateFrom" />
+                                        </div>
+                                    </div>
+                                    <div class=" form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="DateTo" />
+                                        </div>
+                                        <div class=" col-md-8">
+                                            <nop-editor asp-for="DateTo" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-7 col-md-offset-5">
+                                        <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                            <i class="fa fa-search"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+            <!-- Search Panel [E] -->
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="reward-grid"></div>
+                    <!-- retrieve data block start -->
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                        $("#reward-grid").kendoGrid({
+                            dataSource: {
+                                type: "json",
+                                transport: {
+                                    read: {
+                                        url: "@Html.Raw(Url.Action("ConsumptionRewardHistoryList", "Transaction", new { username = username, date = date }))",
+                                        type: "POST",
+                                        dataType: "json",
+                                        data: additionalData
+                                    }
+                                },
+                                schema: { //handle data return from controller
+                                    data: "Data",
+                                    total: "Total",
+                                    errors: "Errors",
+                                    model: {
+                                        id: "Id",
+                                        fields: {
+                                            //Id: { editable: false, type: "number" },
+                                            Date: { editable: false, type: "date"},
+                                            PlatformName: { editable: false, type: "string" },
+                                            TotalDepositReturned: { editable: false, type: "number" },
+                                            TotalMembershipReward: { editable: false, type: "number" },
+                                            TotalConsumptionReward: { editable: false, type: "number" },
+                                            TotalHonoraryCitizenReward: { editable: false, type: "number"},
+                                            GrandTotalReward: { editable: false, type: "number" }
+                                        }
+                                    }
+                                },
+                                group: {
+                                    field: "Date"
+                                },
+
+                                aggregate: [
+                                    //{ field: "PlatformName", aggregate: "count" },
+                                    { field: "TotalDepositReturned", aggregate: "sum" },
+                                    { field: "TotalMembershipReward", aggregate: "sum" },
+                                    { field: "TotalConsumptionReward", aggregate: "sum" },
+                                    { field: "TotalHonoraryCitizenReward", aggregate: "sum"},
+                                    { field: "GrandTotalReward", aggregate: "sum" }
+                                ],
+
+                                error: function(e) {
+                                    display_kendoui_grid_error(e);
+                                    // Cancel the changes
+                                    this.cancelChanges();
+                                },
+                                pageSize: [@(defaultGridPageSize)],
+                                serverPaging: true,
+                                serverFiltering: true,
+                                serverSorting: true
+                            },
+                            @*pageable: {
+                                refresh: true,
+                                pageSizes: [@(gridPageSizes)],
+                                @await Html.PartialAsync("_GridPagerMessages")
+                            },*@
+                            scrollable: false,
+                            //dataBound: onDataBound,
+                            columns: [
+                                {
+                                    field: "Date",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.Date")",
+                                    width: 200,
+                                    hidden: true,
+                                    format: "{0:@dateFormat}"
+                                },
+                                {
+                                    field: "PlatformName",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.PlatformName")",
+                                    width: 200,
+                                    footerTemplate: "All"
+                                },
+                                {
+                                    field: "TotalDepositReturned",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalDepositReturned.mbtc")",
+                                    width: 200,
+                                    footerTemplate: " #= kendo.toString(sum, '0.000') #",
+                                    format: "{0:n3}"
+                                },
+                                {
+                                    field: "TotalMembershipReward",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalMembershipReward.mbtc")",
+                                    width: 200,
+                                    url: "@Html.Raw(Url.Action("ConsumptionRewardHistoryList", "Transaction"))",
+                                    footerTemplate: " #= kendo.toString(sum, '0.000') #",
+                                    format: "{0:n3}"
+                                },
+                                {
+                                    field: "TotalConsumptionReward",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalConsumptionReward.mbtc")",
+                                    //width: 200, //Jerry 20181030 MSP-408
+                                    width: 250, //Jerry 20181030 MSP-408
+                                    footerTemplate: " #= kendo.toString(sum, '0.000') #",
+                                    format: "{0:n3}"
+                                },
+                                {
+                                    field: "TotalHonoraryCitizenReward",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.TotalHonoraryCitizenReward.mbtc")",
+                                    width: 200,
+                                    footerTemplate: " #= kendo.toString(sum, '0.000') #",
+                                    format: "{0:n3}"
+                                },
+                                {
+                                    field: "GrandTotalReward",
+                                    title: "@T("Admin.TransactionList.ConsumptionRewardHistory.Fields.GrandTotalReward.mBTC")",
+                                    width: 200,
+                                    footerTemplate: " #= kendo.toString(sum, '0.000') #",
+                                    format: "{0:n3}"
+                                }
+                            ]
+                            });
+
+                        function additionalData() {
+                            var data = {
+                                //Jerry 20181102 MSP-436 \/
+                                @*CustomerId:  $('#@Html.IdFor(model => model.CustomerId)').val(),
+                                Date: $('#@Html.IdFor(model => model.Date)').val()*@
+                                CustomerId:  $('#@Html.IdFor(model => model.TeamModel.CustomerId)').val(),
+                                Date: $('#@Html.IdFor(model => model.TeamModel.Date)').val()
+                                //Jerry 20181102 MSP-436 /\
+                            };
+                            addAntiForgeryToken(data);
+                            return data;
+                        }
+                    });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*//Jerry 20181102 MSP-436 \/*@
+    <input asp-for="SelfListModel.FromDate" type="hidden" />
+    <input asp-for="SelfListModel.ToDate" type="hidden" />
+    <input asp-for="SelfListModel.Username" type="hidden" />
+    <input asp-for="SelfListModel.PlatformID" type="hidden" />
+    <input asp-for="SelfListModel.DepositReturnFrom" type="hidden" />
+    <input asp-for="SelfListModel.DepositReturnTo" type="hidden" />
+    <input asp-for="SelfListModel.MemberRewardFrom" type="hidden" />
+    <input asp-for="SelfListModel.MemberRewardTo" type="hidden" />
+    <input asp-for="SelfListModel.ConsumptionFrom" type="hidden" />
+    <input asp-for="SelfListModel.ConsumptionTo" type="hidden" />
+    <input asp-for="SelfListModel.MerchantRefFrom" type="hidden" />
+    <input asp-for="SelfListModel.MerchantRefTo" type="hidden" />
+    <input asp-for="SelfListModel.TotalRewardFrom" type="hidden" />
+    <input asp-for="SelfListModel.TotalRewardTo" type="hidden" />
+    @*//Jerry 20181102 MSP-436 /\*@
+</form>

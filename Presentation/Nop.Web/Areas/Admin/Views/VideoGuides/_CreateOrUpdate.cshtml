@@ -1,0 +1,29 @@
+﻿@model VideoGuideModel
+@inject IEventPublisher eventPublisher
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<div class="content">
+    <div class="form-horizontal">
+        <nop-tabs id="videoguides-edit">
+            <nop-tab asp-name="tab-info" asp-title="@T("Admin.ContentManagement.Announcements.VideoGuideItems.Info")" asp-default="true">@await Html.PartialAsync("_CreateOrUpdate.Info", Model)</nop-tab>
+            @*Tony Liew 20181217 MDT-143 \/*@
+            @*@if (Model.Id > 0)
+            {
+                <nop-tab asp-name="tab-Chinese" asp-title="@T("Admin.ContentManagement.Announcements.VideoGuides.Info.ChineseTab")">@await Html.PartialAsync("_CreateOrUpdate.Info.ChineseTab", Model)</nop-tab>
+            }*@
+            @*Tony Liew 20181217 MDT-143 /\*@
+        </nop-tabs>
+    </div>
+</div>
+
+@{
+    //custom tabs
+    var eventMessage = new AdminTabStripCreated(this.Html, "videoguides-edit");
+    eventPublisher.Publish(eventMessage);
+    foreach (var eventBlock in eventMessage.BlocksToRender)
+    {
+        @eventBlock
+    }
+}

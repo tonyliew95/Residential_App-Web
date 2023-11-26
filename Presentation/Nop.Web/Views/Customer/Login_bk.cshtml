@@ -1,0 +1,80 @@
+﻿@model LoginModel
+@using System.Net
+@using Nop.Core
+@inject IWebHelper webHelper
+@{
+    Layout = "_Root.Head";
+
+    //title
+    Html.AddTitleParts(T("PageTitle.Login").Text);
+    //page class
+    Html.AppendPageCssClassParts("html-login-page");
+
+    //WilliamHo 20190117 MDT-680 \/
+    //register URL with return URL (if specified)
+    //var registerUrl = Url.RouteUrl("~/Admin");
+    //if (!string.IsNullOrEmpty(this.Context.Request.Query["returnUrl"]))
+    //{
+    //    registerUrl = webHelper.ModifyQueryString(registerUrl, "returnurl=" + WebUtility.UrlEncode(this.Context.Request.Query["returnUrl"]), null);
+    //}
+    //WilliamHo 20190117 MDT-680 /\
+
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<style>
+    .form-signin {
+        max-width: 400px;
+        padding: 15px;
+        margin: 15% auto;
+    }
+</style>
+
+<div class="page login-page">
+    <div class="container form-signin">
+        <form asp-route="Login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]" method="post">
+            <div asp-validation-summary="ModelOnly" class="message-error">@T("Account.Login.Unsuccessful")</div>
+            <h2 class="form-signin-heading">@T("Account.Login.Welcome")</h2>
+
+            @if (Model.UsernamesEnabled)
+            {
+                <div class="inputs">
+                    <label asp-for="Username" asp-postfix=":" class="text-left"></label>
+                    <input asp-for="Username" class="form-control" autofocus="autofocus" />
+                    <span asp-validation-for="Username"></span>
+                </div>
+            }
+            else
+            {
+                <div class="inputs">
+                    <label asp-for="Email" asp-postfix=":" class="text-left"></label>
+                    <input asp-for="Email" class="form-control" id="inputEmail" autofocus="autofocus" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+            }
+            <div class="inputs">
+                <label asp-for="Password" asp-postfix=":" class="text-left"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password"></span>
+            </div>
+            @*<div class="checkbox">
+                <input asp-for="RememberMe" />
+                <label asp-for="RememberMe" class="mb-0"></label>
+                <span class="forgot-password ">
+                    <a asp-route="PasswordRecovery">@T("Account.Login.ForgotPassword")</a>
+                </span>
+            </div>*@
+            @if (Model.DisplayCaptcha)
+            {
+                <div class="captcha-box">
+                    <nop-captcha />
+                </div>
+            }
+            <div class="buttons">
+                <input class="btn btn-lg btn-primary btn-block login-button" type="submit" value="@T("Account.Login.LoginButton")" />
+            </div>
+        </form>
+    </div>
+</div>

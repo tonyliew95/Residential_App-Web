@@ -1,0 +1,514 @@
+﻿@model DepositRewardHistoryListModel
+@inject AdminAreaSettings adminAreaSettings
+@using Nop.Services.Helpers;
+
+@{
+    var defaultGridPageSize = adminAreaSettings.DefaultGridPageSize;
+    var gridPageSizes = adminAreaSettings.GridPageSizes;
+
+    var dateFormat = MspHelper.GetGlobalDateFormat("MSP_GlobalUITimeStamp", "yyyy-MM-dd HH:mm:ss"); //Atiqah 20190221 MDT-257
+
+    //page title
+    ViewBag.Title = T("Admin.TransactionList.DepositRewardHistory").Text;
+    //active menu item (system name)
+    Html.SetActiveMenuItemSystemName("Deposit Reward History");
+}
+
+<form asp-controller="Transaction" asp-action="DepositRewardHistoryList" method="post">
+    <div class="content-header clearfix">
+        <h1 class="pull-left">
+            @T("Admin.TransactionList.DepositRewardHistory")
+        </h1>
+        <!--//Jerry 20181218 MDT-158 \/-->
+        @*<div class="pull-right">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success">
+                        <i class="fa fa-download"></i>
+                        @T("Admin.Common.Export")
+                    </button>
+                    <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">&nbsp;</span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <button type="submit" name="exportcsv">
+                                <i class="fa fa-file-text-o"></i>
+                                @T("Admin.Common.ExportToCsv")
+                            </button>
+                        </li>
+                    </ul>
+                    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_deposit_reward_history_list_buttons" })
+                </div>
+            </div>*@
+        <!--//Jerry 20181218 MDT-158 /\-->
+        @* 20181228 WKK MSP-618	 *@
+        <div class="pull-right">
+            <button type="submit" name="exportcsv" class="btn bg-green">
+                <i class="fa fa-download"></i>
+                @T("Admin.Common.ExportToCsv")
+            </button>
+            @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_transaction_deposit_reward_history_list_buttons" })
+        </div>
+        @* 20181228 WKK MSP-618	 *@
+    </div>
+
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+
+                <div class="panel panel-default panel-search">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="Username" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="Username" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateFrom" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <nop-editor asp-for="DateFrom" asp-required="true" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DateTo" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <nop-editor asp-for="DateTo" asp-required="true" />
+                                    </div>
+                                </div>
+                                @*//Jerry 20181009 MSP-209 \/ *@
+                                @*//Atiqah 20190221 MDT-257 \/*@
+                                @*<div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="ContributedBy" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="ContributedBy" />
+                                        </div>
+                                    </div>*@
+                                @*//Atiqah 20190221 MDT-257 \/*@
+                                @*//Jerry 20181009 MSP-209 /\ *@
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositAmountFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositAmountFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositAmountTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositAmountTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnedFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnedFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnedTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnedTo" />
+                                    </div>
+                                </div>
+                                @*//Atiqah 20190221 MDT-257 \/*@
+                                @*<div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="DepositRewardFrom" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="DepositRewardFrom" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="DepositRewardTo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="DepositRewardTo" />
+                                        </div>
+                                    </div>*@
+                                @*//Atiqah 20190221 MDT-257 /\*@
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnedRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnedRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositReturnedRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositReturnedRewardTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositOverflowRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositOverflowRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="DepositOverflowRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="DepositOverflowRewardTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ExtraRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="ExtraRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="ExtraRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="ExtraRewardTo" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TotalRewardFrom" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="TotalRewardFrom" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-4">
+                                        <nop-label asp-for="TotalRewardTo" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        <nop-editor asp-for="TotalRewardTo" />
+                                    </div>
+                                </div>
+                                @*//Atiqah 20190221 MDT-257 \/*@
+                                @*<div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SelfScorePctFrom" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SelfScorePctFrom" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SelfScorePctTo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SelfScorePctTo" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SelfScoreFrom" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SelfScoreFrom" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SelfScoreTo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SelfScoreTo" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TeamScorePctFrom" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TeamScorePctFrom" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TeamScorePctTo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TeamScorePctTo" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TeamScoreFrom" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TeamScoreFrom" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="TeamScoreTo" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="TeamScoreTo" />
+                                        </div>
+                                    </div>*@
+                                @*//Atiqah 20190221 MDT-257 /\*@
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7 col-md-offset-5">
+                                <button type="button" id="search-txn" class="btn btn-primary btn-search">
+                                    <i class="fa fa-search"></i>
+                                    @T("Admin.Common.Search")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Panel [E] -->
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="txn-grid"></div>
+                        <!-- retrieve data block start -->
+                        @*<script type="text/javascript">
+                            </script>*@
+
+                        <script type="text/javascript">
+                            //var selectedIds = [];
+                            $(document).ready(function ()
+                            {
+                                //search button
+                                $('#search-txn').click(function ()
+                                {
+                                    var dtFrom = $('#@Html.IdFor(model => model.DateFrom)').val();
+                                    var dtTo = $('#@Html.IdFor(model => model.DateTo)').val();
+
+                                    if (dtFrom == '' || dtTo == '') {
+                                        alert("@T("Admin.DateTimeFormat.NoEmpty")");
+                                        return;
+                                    }
+
+                                    var dtFrom1 = new Date(dtFrom);
+                                    var dtTo1 = new Date(dtTo);
+
+                                    if (dtTo1 < dtFrom1) {
+                                        alert("@T("Admin.DateTimeFormat.UnusualDateRange")");
+                                        return;
+                                    }
+
+                                    getTrx();
+
+                                    var grid = $('#txn-grid').data('kendoGrid');
+                                    grid.dataSource.page(1); //new search. Set page size to 1
+                                    //grid.dataSource.read(); we already loaded the grid above using "page" function
+                                    //clear selected checkboxes
+                                    //$('.checkboxGroups').attr('checked', false).change();
+                                    //selectedIds = [];
+                                    return false;
+                                });
+
+                                function getTrx()
+                                {
+                                    $("#txn-grid").kendoGrid({
+                                        dataSource: {
+                                            type: "json",
+                                            transport: {
+                                                read: {
+                                                    url: "@Html.Raw(Url.Action("DepositRewardHistoryList", "Transaction"))", //ActionName and Controller
+                                                    type: "POST",
+                                                    dataType: "json",
+                                                    data: additionalData
+                                                }
+                                            },
+                                            schema: { //handle data return from controller
+                                                data: "Data",
+                                                total: "Total",
+                                                errors: "Errors",
+                                                model: {
+                                                    //id: "Id",
+                                                    fields: {
+                                                        Username: { editable: false, type: "string" },
+                                                        Date: { editable: false, type: "date" },
+                                                        //ContributedBy: { editable: false, type: "string" }, @*//Atiqah 20190221 MDT-257 *@
+                                                        Deposit_Amt: { editable: false, type: "string" },
+                                                        Deposit_Returned: { editable: false, type: "string" },
+                                                        //Deposit_Reward: { editable: false, type: "string" }, @*//Atiqah 20190221 MDT-257 *@
+                                                        Deposit_Returned_Reward: { editable: false, type: "string" },
+                                                        Deposit_Overflow_Reward: { editable: false, type: "string" },
+                                                        Extra_Reward: { editable: false, type: "string" },
+                                                        Total_Reward: { editable: false, type: "string" },
+                                                        @*//Atiqah 20190221 MDT-257 \/*@
+                                                        //SelfScore_Pct: { editable: false, type: "string" },
+                                                        //SelfScore: { editable: false, type: "string" },
+                                                        //TeamScore_Pct: { editable: false, type: "string" },
+                                                        //TeamScore: { editable: false, type: "string" },
+                                                        @*//Atiqah 20190221 MDT-257 /\*@
+                                                    }
+                                                }
+                                            },
+                                            error: function (e) {
+                                                display_kendoui_grid_error(e);
+                                                // Cancel the changes
+                                                this.cancelChanges();
+                                            },
+                                            pageSize: @(defaultGridPageSize),
+                                            serverPaging: true,
+                                            serverFiltering: true,
+                                            serverSorting: true
+                                        },
+                                        pageable: {
+                                            refresh: true,
+                                            pageSizes: [@(gridPageSizes)],
+                                            @await Html.PartialAsync("_GridPagerMessages")
+                                        },
+                                        scrollable: false,
+                                        columns: [
+                                            {
+                                                field: "Username",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.Username")",
+                                                width: 500
+                                            },
+                                            {
+                                                field: "Date",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.Date")",
+                                                width: 250,
+                                                format: "{0: @dateFormat}" //RW MSP-416 20181031
+                                            },
+                                            @*{
+                                                field: "ContributedBy",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.ContributedBy")", //Atiqah 20190221 MDT-257
+                                                width: 250
+                                            },*@
+                                            {
+                                                field: "Deposit_Amt",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.DepositAmount")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Deposit_Returned",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.DepositReturned")",
+                                                width: 250
+                                            },
+                                            @*{
+                                                field: "Deposit_Reward",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.DepositReward")", //Atiqah 20190221 MDT-257
+                                                width: 250
+                                            },*@
+                                            {
+                                                field: "Deposit_Returned_Reward",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.DepositReturnedReward")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Deposit_Overflow_Reward",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.DepositOverflowReward")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Extra_Reward",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.ExtraReward")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "Total_Reward",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.TotalReward")",
+                                                width: 250
+                                            },
+                                            @*//Atiqah 20190221 MDT-257 \/
+                                            {
+                                                field: "SelfScore_Pct",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.SelfScorePct")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "SelfScore",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.SelfScore")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "TeamScore_Pct",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.TeamScorePct")",
+                                                width: 250
+                                            },
+                                            {
+                                                field: "TeamScore",
+                                                title: "@T("Admin.TransactionList.DepositRewardHistory.Fields.TeamScore")",
+                                                width: 250
+                                            },//Atiqah 20190221 MDT-257 /\*@
+                                        ]
+                                    });
+                                }
+
+                                function additionalData()
+                                {
+                                    var data = {
+                                        Username: $('#@Html.IdFor(model => model.Username)').val(),
+                                        DateFrom: $('#@Html.IdFor(model => model.DateFrom)').val(),
+                                        DateTo: $('#@Html.IdFor(model => model.DateTo)').val(),
+                                        @*ContributedBy: $('#@Html.IdFor(model => model.ContributedBy)').val(), //Atiqah 20190221 MDT-257 \/*@
+                                        DepositAmountFrom: $('#@Html.IdFor(model => model.DepositAmountFrom)').val(),
+                                        DepositAmountTo: $('#@Html.IdFor(model => model.DepositAmountTo)').val(),
+                                        DepositReturnedFrom: $('#@Html.IdFor(model => model.DepositReturnedFrom)').val(),
+                                        DepositReturnedTo: $('#@Html.IdFor(model => model.DepositReturnedTo)').val(),
+                                        @*DepositRewardFrom: $('#@Html.IdFor(model => model.DepositRewardFrom)').val(), //Atiqah 20190221 MDT-257 \/
+                                        DepositRewardTo: $('#@Html.IdFor(model => model.DepositRewardTo)').val(),*@ //Atiqah 20190221 MDT-257 \/
+                                        DepositReturnedRewardFrom: $('#@Html.IdFor(model => model.DepositReturnedRewardFrom)').val(),
+                                        DepositReturnedRewardTo: $('#@Html.IdFor(model => model.DepositReturnedRewardTo)').val(),
+                                        DepositOverflowRewardFrom: $('#@Html.IdFor(model => model.DepositOverflowRewardFrom)').val(),
+                                        DepositOverflowRewardTo: $('#@Html.IdFor(model => model.DepositOverflowRewardTo)').val(),
+                                        ExtraRewardFrom: $('#@Html.IdFor(model => model.ExtraRewardFrom)').val(),
+                                        ExtraRewardTo: $('#@Html.IdFor(model => model.ExtraRewardTo)').val(),
+                                        TotalRewardFrom: $('#@Html.IdFor(model => model.TotalRewardFrom)').val(),
+                                        TotalRewardTo: $('#@Html.IdFor(model => model.TotalRewardTo)').val(),
+                                        @*//Atiqah 20190221 MDT-257 \/
+                                        SelfScorePctFrom: $('#@Html.IdFor(model => model.SelfScorePctFrom)').val(),
+                                        SelfScorePctTo: $('#@Html.IdFor(model => model.SelfScorePctTo)').val(),
+                                        SelfScoreFrom: $('#@Html.IdFor(model => model.SelfScoreFrom)').val(),
+                                        SelfScoreTo: $('#@Html.IdFor(model => model.SelfScoreTo)').val(),
+                                        TeamScorePctFrom: $('#@Html.IdFor(model => model.TeamScorePctFrom)').val(),
+                                        TeamScorePctTo: $('#@Html.IdFor(model => model.TeamScorePctTo)').val(),
+                                        TeamScoreFrom: $('#@Html.IdFor(model => model.TeamScoreFrom)').val(),
+                                        TeamScoreTo: $('#@Html.IdFor(model => model.TeamScoreTo)').val(),
+                                        //Atiqah 20190221 MDT-257 \/*@
+                                    };
+                                    addAntiForgeryToken(data);
+                                    return data;
+                                }
+
+                            });
+                        </script>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>

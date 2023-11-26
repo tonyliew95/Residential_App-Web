@@ -1,0 +1,64 @@
+Configurations needed for BalkanOrgChart version 3.7.3
+
+1. 
+Add 
+BALKANGraph.action.cusdetails = 15;  //RW 20190102 MSP-609
+below 
+BALKANGraph.action.exporting = 14;
+
+reason: To have a custom action to get nodeId for our own purpose
+
+2. 
+Add 
+customNodeId = null; //RW 20180102 MSP609
+to 
+var d = function(l){}
+
+Reason: set the custom global variable to null, to prevent CustomerDetails Modal to be triggered
+
+3. Comment 
+return '<a style="text-decoration: none;position:absolute;bottom:' + a + "px;left:" + a + 'px;" title="OrgChart | BALKANGraph" href="https://BALKANGraph.com"><span style="color:#039BE5;font-family:Roboto,Roboto-Regular,Helvetica;font-weight:bold;">BALKAN</span><span style="color:#F57C00;font-family:Roboto,Roboto-Regular,Helvetica;">Graph</span></a>'
+and add
+return ''//RW 20190103
+at
+BALKANGraph._a = function(a) {};
+
+Reason: To remove the "BALKANGraph" logo at the lower left of the chart.
+
+4. Add
+customNodeId = null; //RW 20180102 MSP609
+to 
+var i = function(q) {};
+
+Reason: set the custom global variable to null, to prevent CustomerDetails Modal to be triggered when click and drag on the chart(mousemove)
+
+5. Add 
+//RW 20190102 MSP-609
+    if (this.config.nodeMouseClickBehaviour == BALKANGraph.action.cusdetails) {
+        //this.editUI.show(a.id);
+        this.ripple(a.id, b[0].clientX, b[0].clientY)
+        customNodeId = a.id;
+        //console.log(customNodeId);
+    }
+};
+var customNodeId;
+//RW 20190102 MSP-609
+
+at
+OrgChart.prototype._as = function(d, b) {};
+below
+if (this.config.nodeMouseClickBehaviour == BALKANGraph.action.details) {
+        this.editUI.show(a.id, true);
+        this.ripple(a.id, b[0].clientX, b[0].clientY)
+    }
+
+Reason: set a new Global Variable to be called in web "customNodeId" and pass the nodeId to.
+
+6. Add id="searchUI"
+to 
+OrgChart.searchUI.createInputField = function(a) {};
+at 
+	//RW 20190102 MSP-609
+	return '<div data-id="search" style="display:none;border-radius: 20px 20px;padding:5px; box-shadow: #808080 0px 1px 2px 0px; font-family:Roboto-Regular, Helvetica;color:#7a7a7a;font-size:14px;border:1px solid #d7d7d7;width:300px;position:absolute;top:' + a + "px;left:" + a + 'px;background-color:#ffffff;"><div><div style="float:left;">' + BALKANGraph.icon.search(32, 32) + '</div><div data-id="cell-1" style="float:right; width:83%"><input placeholder="Search" style="font-size:14px;font-family:Roboto-Regular, Helvetica;color:#7a7a7a;width:100%;border:none;outline:none; padding-top:10px;" type="text" /></div><div style="clear:both;"></div></div><div data-id="container"></div></div>'
+
+Reason: assign id to the SearchUI to prevent CustomerDetails Modal to be triggered when click in web

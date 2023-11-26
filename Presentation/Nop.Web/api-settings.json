@@ -1,0 +1,19 @@
+{
+  "Version": "1.3.2",
+  "ResponseConfiguration": {
+    "CacheControl": "no-cache, no-store, max-age=0, must-revalidate",
+    "Expires": "0",
+    "Pragma": "no-cache",
+    "XContentTypeOptions": "nosniff",
+    "XssProtection": "1; mode=block",
+    "XFrameOptions": "DENY"
+  },
+  "Settings": {
+    "EnabledSwaggerUI": true
+  },
+  "CORS": {
+    "Origins": [ "*" ],
+    "Methods": [ "GET", "PUT", "POST", "OPTIONS" ],
+    "Headers": [ "Content-Type", "Authorization", "Accept", "Cache-Control" ]
+  }
+}

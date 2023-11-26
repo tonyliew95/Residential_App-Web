@@ -1,0 +1,131 @@
+﻿@using System.Text.Encodings.Web
+@model CustomerModel
+
+<div class="panel-group">
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_customer_details_revenue_top", additionalData = Model.Id })
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <!--//Jerry 20180824 MSP-45 \/ -->
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Deposit_BTC_Address" />
+            </div>
+            <div class="col-md-9">
+                <div class="form-text-row">@Model.Deposit_BTC_Address</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Withdrawal_BTC_Address" />
+            </div>
+            <div class="col-md-9">
+                <div class="form-text-row">@Model.Withdrawal_BTC_Address</div>
+            </div>
+        </div>*@
+            <!--//Jerry 20180824 MSP-45 /\-->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Current_Score_Y" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Current_Score_Y</div>
+                </div>
+            </div>
+            <!--//Jerry 20180824 MSP-45 \/ -->
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Current_Score_Y_Percentage" />
+            </div>
+            <div class="col-md-9">
+                <div class="form-text-row">@Model.Current_Score_Y_Percentage</div>
+            </div>
+        </div>*@
+            <!--//Jerry 20180824 MSP-45 /\ -->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Current_Score_Z" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Current_Score_Z</div>
+                </div>
+            </div>
+            <!--//Jerry 20180824 MSP-45 \/ -->
+            @*<div class="form-group">
+            <div class="col-md-3">
+                <nop-label asp-for="Current_Score_Z_Percentage" />
+            </div>
+            <div class="col-md-9">
+                <div class="form-text-row">@Model.Current_Score_Z_Percentage</div>
+            </div>
+        </div>*@
+            <!--//Jerry 20180824 MSP-45 /\ -->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Deposit_Wallet" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Deposit_Wallet</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Deposit_Returned_Amount" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Deposit_Returned_Amount</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Deposit_Not_Returned_Amount" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Deposit_Not_Returned_Amount</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Available_Balance" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Available_Balance</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Total_Reward_Earned" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Total_Reward_Earned</div>
+                </div>
+            </div>
+            <!--//Jerry 20180824 MSP-45 \/ -->
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Total_Self_Reward_Earned" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Total_Self_Reward_Earned</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Total_Team_Reward_Earned" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Total_Team_Reward_Earned</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <nop-label asp-for="Redeem_Wallet" />
+                </div>
+                <div class="col-md-9">
+                    <div class="form-text-row">@Model.Redeem_Wallet</div>
+                </div>
+            </div>
+            <!--//Jerry 20180824 MSP-45 /\ -->
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdminWidget", new { widgetZone = "admin_customer_details_revenue_bottom", additionalData = Model.Id })
+</div>
